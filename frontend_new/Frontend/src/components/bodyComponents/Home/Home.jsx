@@ -3,11 +3,14 @@ import { Box, Grid, IconButton, Drawer, AppBar, Toolbar, useMediaQuery } from "@
 import MenuIcon from '@mui/icons-material/Menu';
 import CloseIcon from '@mui/icons-material/Close';
 import SideBarComponent from "../../SideBarComponent";
+import { UilReceipt, UilBox, UilTruck, UilCheckCircle } from '@iconscout/react-unicons';
 
-import UilReceipt from "@iconscout/react-unicons/icons/uil-receipt";
-import UilBox from "@iconscout/react-unicons/icons/uil-box";
-import UilTruck from "@iconscout/react-unicons/icons/uil-truck";
-import UilCheckCircle from "@iconscout/react-unicons/icons/uil-check-circle";
+
+// import UilReceipt from "@iconscout/react-unicons/uil-receipt";
+// import UilBox from "@iconscout/react-unicons/uil-box";
+// import UilTruck from "@iconscout/react-unicons/uil-truck";
+// import UilCheckCircle from "@iconscout/react-unicons/uil-check-circle";
+
 import InfoCard from "../../subComponents/InfoCard";
 import TotalSales from "./TotalSales";
 import SalesByCity from "./SalesByCity";

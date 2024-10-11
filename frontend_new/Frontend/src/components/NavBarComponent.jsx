@@ -48,6 +48,36 @@ export default function NavBarComponent() {
     setNotificationAnchorEl(null);
   };
 
+  const handleLogin = async (username, password) => {
+    const response = await fetch('/api/login', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({ username, password }),
+    });
+  
+    if (response.ok) {
+      const data = await response.json();
+      localStorage.setItem('token', data.token); // Store token in local storage
+      // You can set user data in state if needed
+    } else {
+      // Handle error
+      alert('Login failed');
+    }
+  };
+  
+  const handleLogout = async () => {
+    await fetch('/api/logout', {
+      method: 'POST',
+      headers: {
+        Authorization: `Bearer ${localStorage.getItem('token')}`,
+      },
+    });
+    localStorage.removeItem('token'); // Remove token on logout
+    // Optionally, redirect to login page or update state
+  };
+
   return (
     <Grid container sx={{ width: '100%' }}>
       <Grid item xs={12}>
@@ -148,7 +178,7 @@ export default function NavBarComponent() {
                     </ListItemIcon>
                     Settings
                   </MenuItem>
-                  <MenuItem>
+                  <MenuItem onClick={handleLogout}>
                     <ListItemIcon>
                       <Logout fontSize="small" />
                     </ListItemIcon>
