@@ -3,16 +3,33 @@ import { Box, Container, Typography, Grid, Button } from "@mui/material";
 import { Link } from 'react-router-dom';
 import { Fade } from '@mui/material'; // For animations
 import images from "../constants/images";
+import LinkedInIcon from '@mui/icons-material/LinkedIn';
+import TwitterIcon from '@mui/icons-material/Twitter';
+import FacebookIcon from '@mui/icons-material/Facebook';
 import Example from "./FloatingPhone"; // Import Example component
 import TeamComponent from "./TeamComponent";
 import "../../app.css";
+import NavBarComponent from "./NavBarComponent"; 
+import Footer from "./FooterComponent";
 
 export default function RootPage() {
+  const links = [
+    { href: '#', label: 'Home' },
+    { href: '#', label: 'About' },
+    { href: '/contact-us', label: 'Contact' },
+  ];
+
+  const socialLinks = [
+    { href: '#', label: 'LinkedIn', icon: <LinkedInIcon /> },
+    { href: '#', label: 'Twitter', icon: <TwitterIcon /> },
+    { href: '#', label: 'Facebook', icon: <FacebookIcon /> },
+  ];
+
   return (
     <Container 
       maxWidth={false} // This removes the max-width constraint
       disableGutters // This removes the default padding
-      sx={{ bgcolor: "#f0f4f8", py: 10, px: 5 }} // Add any custom padding or other styles as needed
+      sx={{ bgcolor: "#f0f4f8", py: 5, px: 5, mb : 0 }} // Add any custom padding or other styles as needed
     >
       {/* Header Section */}
       <Box sx={{ textAlign: 'center', mb: 5  }}>
@@ -76,14 +93,17 @@ export default function RootPage() {
         <Example />
       </Box>
 
-      <div className="h-screen bg-gray-100 flex items-center justify-center">
+      {/* <div className="h-screen bg-gray-100 flex items-center justify-center">
       <h1 className="text-4xl font-bold text-blue-500">
         Hello, Tailwind CSS with Vite!
       </h1>
-    </div>
-        <Box>
-        <TeamComponent/>
-        </Box>
+    </div> */}
+    <Box sx={{ textAlign: 'center', mt: 8 }}>
+        <TeamComponent />
+      </Box>
+        <div>
+        <Footer companyName="Your Company" links={links} socialLinks={socialLinks} />
+        </div>
       
 
       {/* Call to Action Section */}

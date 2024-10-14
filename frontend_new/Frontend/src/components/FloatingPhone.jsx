@@ -1,8 +1,10 @@
 import React from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { motion } from "framer-motion";
 import { FiBatteryCharging, FiWifi } from "react-icons/fi";
-import { Box, Button } from "@mui/material"; // Import MUI components for styling
+import { Box, Button } from "@mui/material"; 
+import { useAuth } from '../AuthContext'; // Import the useAuth hook
+import { toast } from 'react-toastify'; // Import toast
 
 const Example = () => {
   return (
@@ -18,32 +20,23 @@ const FloatingPhone = () => {
       sx={{
         transformStyle: "preserve-3d",
         transform: "rotateY(-30deg) rotateX(15deg)",
-        bgcolor: "#8b5cf6", // Equivalent to Tailwind's bg-violet-500
+        bgcolor: "#8b5cf6",
         borderRadius: "24px",
       }}
     >
       <motion.div
-        initial={{
-          transform: "translateZ(8px) translateY(-2px)",
-        }}
-        animate={{
-          transform: "translateZ(32px) translateY(-8px)",
-        }}
-        transition={{
-          repeat: Infinity,
-          repeatType: "mirror",
-          duration: 2,
-          ease: "easeInOut",
-        }}
+        initial={{ transform: "translateZ(8px) translateY(-2px)" }}
+        animate={{ transform: "translateZ(32px) translateY(-8px)" }}
+        transition={{ repeat: Infinity, repeatType: "mirror", duration: 2, ease: "easeInOut" }}
         style={{
-          height: "24rem", // h-96 in Tailwind
-          width: "14rem", // w-56 in Tailwind
+          height: "24rem",
+          width: "14rem",
           borderRadius: "24px",
           borderWidth: "2px",
           borderBottomWidth: "4px",
           borderRightWidth: "4px",
           borderColor: "#ffffff",
-          backgroundColor: "#0f0f0f", // bg-neutral-900
+          backgroundColor: "#0f0f0f",
           padding: "8px",
           position: "relative",
         }}
@@ -65,7 +58,7 @@ const HeaderBar = () => {
           top: "10px",
           width: "64px",
           height: "8px",
-          bgcolor: "#171717", // bg-neutral-900
+          bgcolor: "#171717",
           borderRadius: "4px",
           transform: "translateX(-50%)",
           zIndex: 10,
@@ -80,6 +73,17 @@ const HeaderBar = () => {
 };
 
 const Screen = () => {
+  const { isLoggedIn } = useAuth(); // Use context to get login state
+  const navigate = useNavigate(); // Hook for navigation
+
+  const handleGetStartedClick = () => {
+    if (isLoggedIn) {
+      navigate('/home'); // Redirect to home if logged in
+    } else {
+      toast.error("Please log in to get started!"); // Show toast if not logged in
+    }
+  };
+
   return (
     <Box
       sx={{
@@ -87,34 +91,27 @@ const Screen = () => {
         placeContent: "center",
         height: "100%",
         width: "100%",
-        bgcolor: "#ffffff", // bg-white
+        bgcolor: "#ffffff",
         borderRadius: "20px",
         position: "relative",
         overflow: "hidden",
       }}
     >
-      {/* Example logo from logoispum */}
       <svg
         width="50"
         height="39"
         viewBox="0 0 50 39"
         fill="none"
         xmlns="http://www.w3.org/2000/svg"
-        style={{ fill: "#8b5cf6" }} // fill-violet-500
+        style={{ fill: "#8b5cf6" }}
       >
-        <path
-          d="M16.4992 2H37.5808L22.0816 24.9729H1L16.4992 2Z"
-          stopColor="#000000"
-        />
-        <path
-          d="M17.4224 27.102L11.4192 36H33.5008L49 13.0271H32.7024L23.2064 27.102H17.4224Z"
-          stopColor="#000000"
-        />
+        <path d="M16.4992 2H37.5808L22.0816 24.9729H1L16.4992 2Z" />
+        <path d="M17.4224 27.102L11.4192 36H33.5008L49 13.0271H32.7024L23.2064 27.102H17.4224Z" />
       </svg>
 
-      <Link to="/home" style={{ textDecoration: 'none' }}>
       <Button
         variant="contained"
+        onClick={handleGetStartedClick} // Call the click handler
         sx={{
           position: "absolute",
           bottom: "32px",
@@ -129,17 +126,16 @@ const Screen = () => {
       >
         Get Started
       </Button>
-      </Link>
 
       <Box
         sx={{
           position: "absolute",
-          bottom: "-18rem", // Adjust bottom position for the circle
+          bottom: "-18rem",
           left: "50%",
-          width: "24rem", // w-96
+          width: "24rem",
           height: "24rem",
           borderRadius: "50%",
-          bgcolor: "#8b5cf6", // bg-violet-500
+          bgcolor: "#8b5cf6",
           transform: "translateX(-50%)",
         }}
       />

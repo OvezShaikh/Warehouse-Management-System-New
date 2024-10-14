@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState, useEffect } from "react";
 import {
   Box,
   Grid,
@@ -14,6 +14,7 @@ import {
   Divider,
   ListItemIcon,
   Tooltip,
+  Button,
 } from "@mui/material";
 import {
   NotificationsOutlined,
@@ -21,16 +22,17 @@ import {
   Logout,
   AccountCircleOutlined,
 } from "@mui/icons-material";
-import { useState } from "react";
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import images from "../constants/images";
-
+import { useAuth } from '../AuthContext'; // Import the useAuth hook
 
 export default function NavBarComponent() {
+  const { isLoggedIn, userName, logout } = useAuth(); // Use context
   const [notificationAnchorEl, setNotificationAnchorEl] = useState(null);
   const [anchorEl, setAnchorEl] = useState(null);
   const open = Boolean(anchorEl);
   const notificationOpen = Boolean(notificationAnchorEl);
+  const navigate = useNavigate();
 
   const handleAvatarClicked = (event) => {
     setAnchorEl(event.currentTarget);
@@ -48,25 +50,6 @@ export default function NavBarComponent() {
     setNotificationAnchorEl(null);
   };
 
-  const handleLogin = async (username, password) => {
-    const response = await fetch('/api/login', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({ username, password }),
-    });
-  
-    if (response.ok) {
-      const data = await response.json();
-      localStorage.setItem('token', data.token); // Store token in local storage
-      // You can set user data in state if needed
-    } else {
-      // Handle error
-      alert('Login failed');
-    }
-  };
-  
   const handleLogout = async () => {
     await fetch('/api/logout', {
       method: 'POST',
@@ -74,15 +57,21 @@ export default function NavBarComponent() {
         Authorization: `Bearer ${localStorage.getItem('token')}`,
       },
     });
-    localStorage.removeItem('token'); // Remove token on logout
-    // Optionally, redirect to login page or update state
+    logout(); // Use the logout function from context
+    navigate('/'); // Redirect after logout
+  };
+
+
+
+  const handleSettingsClick = () => {
+    navigate('/settings'); // Adjust the path based on your routing setup
   };
 
   return (
     <Grid container sx={{ width: '100%' }}>
       <Grid item xs={12}>
         <Paper elevation={4}>
-          <AppBar sx={{ padding: 1 }} position="static"> {/* Reduced padding for smaller screens */}
+          <AppBar sx={{ padding: 1 }} position="static">
             <Container maxWidth="xxl">
               <Box
                 sx={{
@@ -92,99 +81,103 @@ export default function NavBarComponent() {
                   alignItems: "center",
                 }}
               >
-                {/* Logo */}
                 <Link to="/" style={{ display: 'flex', alignItems: 'center', textDecoration: 'none' }}>
                   <img
                     src={images.UnostarLogo}
                     alt="Unostar Logo"
                     style={{
                       height: 'auto',
-                      width: '100%', // Makes it responsive in terms of width
-                      maxWidth: '250px', // Sets a maximum width for larger screens
-                      maxHeight: '60px', // Maximum height for larger screens
+                      width: '100%',
+                      maxWidth: '250px',
+                      maxHeight: '60px',
                       objectFit: 'contain',
                     }}
                   />
                 </Link>
 
-                {/* Icons Section */}
                 <Box
                   sx={{
                     display: "flex",
                     justifyContent: "flex-end",
                     alignItems: "center",
                     flexDirection: "row",
-                    gap: { xs: 0, md: 2 }, // Add gap between icons
-                    mt: { xs: 0, md: 0 }, // No margin on mobile
+                    gap: { xs: 0, md: 2 },
+                    mt: { xs: 0, md: 0 },
                   }}
                 >
-                  <IconButton color="inherit" onClick={handleNotificationClicked}>
-                    <Badge variant="dot" color="error" invisible={false}>
-                      <NotificationsOutlined
-                        sx={{ width: { xs: 20, md: 32 }, height: { xs: 20, md: 32 } }} // Reduce size for extra small screens
-                      />
-                    </Badge>
-                  </IconButton>
+                  {isLoggedIn ? (
+                    <>
+                      <IconButton color="inherit" onClick={handleNotificationClicked}>
+                        <Badge variant="dot" color="error" invisible={false}>
+                          <NotificationsOutlined
+                            sx={{ width: { xs: 20, md: 32 }, height: { xs: 20, md: 32 } }}
+                          />
+                        </Badge>
+                      </IconButton>
 
-                  {/* Notification Menu */}
-                  <Menu
-                    open={notificationOpen}
-                    anchorEl={notificationAnchorEl}
-                    onClose={notificationHandleClose}
-                  >
-                    <MenuItem>Notification number 1</MenuItem>
-                    <Divider />
-                    <MenuItem>Notification number 2</MenuItem>
-                    <MenuItem>Notification number 3</MenuItem>
-                  </Menu>
+                      <Menu
+                        open={notificationOpen}
+                        anchorEl={notificationAnchorEl}
+                        onClose={notificationHandleClose}
+                      >
+                        <MenuItem>Notification number 1</MenuItem>
+                        <Divider />
+                        <MenuItem>Notification number 2</MenuItem>
+                        <MenuItem>Notification number 3</MenuItem>
+                      </Menu>
 
-                  <IconButton
-                    onClick={handleAvatarClicked}
-                    size="small"
-                    aria-haspopup="true"
-                  >
-                    <Tooltip title="account settings">
-                      <Avatar sx={{ width: { xs: 20, md: 32 }, height: { xs: 25, md: 32 } }}>Z</Avatar>
-                    </Tooltip>
-                  </IconButton>
+                      <IconButton onClick={handleAvatarClicked} size="small" aria-haspopup="true">
+                        <Tooltip title="account settings">
+                          <Avatar sx={{ width: { xs: 20, md: 32 }, height: { xs: 25, md: 32 } }}>{userName[0]}</Avatar>
+                        </Tooltip>
+                      </IconButton>
 
-                  {/* Username for larger screens */}
-                  <Typography
-                    sx={{
-                      display: { xs: 'none', md: 'block' }, // Hide username on extra small screens
-                    }}
-                    fontFamily={"Inter"}
-                  >
-                    ADMI ZAKARYAE
-                  </Typography>
+                      <Typography
+                        sx={{
+                          display: { xs: 'none', md: 'block' },
+                        }}
+                        fontFamily={"Inter"}
+                      >
+                        {userName}
+                      </Typography>
+
+                      <Menu
+                        open={open}
+                        anchorEl={anchorEl}
+                        onClose={handleClose}
+                      >
+                        <MenuItem component={Link} to="/profile">
+                          <ListItemIcon>
+                            <AccountCircleOutlined fontSize="small" />
+                          </ListItemIcon>
+                          Profile
+                        </MenuItem>
+                        <Divider />
+                        <MenuItem onClick={handleSettingsClick}>
+                          <ListItemIcon>
+                            <Settings fontSize="small" />
+                          </ListItemIcon>
+                          Settings
+                        </MenuItem>
+                        <MenuItem onClick={handleLogout}>
+                          <ListItemIcon>
+                            <Logout fontSize="small" />
+                          </ListItemIcon>
+                          Logout
+                        </MenuItem>
+                      </Menu>
+                    </>
+                  ) : (
+                    <>
+                      <Button color="inherit" component={Link} to="/login">
+                        Login
+                      </Button>
+                      <Button color="inherit" component={Link} to="/register">
+                        Register
+                      </Button>
+                    </>
+                  )}
                 </Box>
-
-                {/* Avatar Menu */}
-                <Menu
-                  open={open}
-                  anchorEl={anchorEl}
-                  onClose={handleClose}
-                >
-                  <MenuItem>
-                    <ListItemIcon>
-                      <AccountCircleOutlined fontSize="small" />
-                    </ListItemIcon>
-                    Profile
-                  </MenuItem>
-                  <Divider />
-                  <MenuItem>
-                    <ListItemIcon>
-                      <Settings fontSize="small" />
-                    </ListItemIcon>
-                    Settings
-                  </MenuItem>
-                  <MenuItem onClick={handleLogout}>
-                    <ListItemIcon>
-                      <Logout fontSize="small" />
-                    </ListItemIcon>
-                    Logout
-                  </MenuItem>
-                </Menu>
               </Box>
             </Container>
           </AppBar>
