@@ -26,6 +26,7 @@ import Login from "./components/Login";
 import Register from "./components/Register";
 import ProfilePage from "./ProfilePage";
 import ContactSection from "./components/Contact";
+import AboutUs from "./components/AboutUs";
 import { ToastContainer } from 'react-toastify'; // Import ToastContainer
 import 'react-toastify/dist/ReactToastify.css'; // Import the CSS
 
@@ -70,6 +71,7 @@ function App() {
         <Route path="/settings" element={<Setting />} />
         <Route path="/profile" element={<ProfilePage />} />
         <Route path="/contact-us" element={<ContactSection />} />
+        <Route path="/about-Us" element={<AboutUs />} />
       </Route>
     )
   );

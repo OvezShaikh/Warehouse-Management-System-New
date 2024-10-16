@@ -1,6 +1,8 @@
 import { Card, Box, CardContent, Typography } from "@mui/material";
+import { lighten } from '@mui/system';
 
 export default function InfoCard({ card }) {
+  const lightPrimary = lighten('#32aef1', 0.2);
   return (
     //do the routing here
     <>
@@ -11,7 +13,7 @@ export default function InfoCard({ card }) {
             m={2}
             sx={{
               display: "flex",
-              bgcolor: "primary.main",
+              bgcolor: lightPrimary,
               borderRadius: 2,
               alignItems: "center",
             }}

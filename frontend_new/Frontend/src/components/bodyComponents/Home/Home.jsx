@@ -3,8 +3,12 @@ import { Box, Grid, IconButton, Drawer, AppBar, Toolbar, useMediaQuery } from "@
 import MenuIcon from '@mui/icons-material/Menu';
 import CloseIcon from '@mui/icons-material/Close';
 import SideBarComponent from "../../SideBarComponent";
-import { UilReceipt, UilBox, UilTruck, UilCheckCircle } from '@iconscout/react-unicons';
-
+import { 
+  ReceiptOutlined, 
+  InventoryOutlined, 
+  LocalShippingOutlined, 
+  CheckCircleOutline 
+} from '@mui/icons-material';
 
 // import UilReceipt from "@iconscout/react-unicons/uil-receipt";
 // import UilBox from "@iconscout/react-unicons/uil-box";
@@ -23,28 +27,28 @@ const Home = () => {
 
   const cardComponent = [
     {
-      icon: <UilBox size={60} color={"#F6F4EB"} />,
+      icon: <InventoryOutlined sx={{ fontSize: 30  }} />,
       title: "Picked",
       subTitle: "1256",
+      mx: 2,
+      my: 0,
+    },
+    {
+      icon: <LocalShippingOutlined sx={{ fontSize: 30  }} />,
+      title: "Shipped",
+      subTitle: "12",
+      mx: 2,
+      my: 0,
+    },
+    {
+      icon: <CheckCircleOutline sx={{ fontSize: 30  }} />,
+      title: "Delivered",
+      subTitle: "15",
       mx: 3,
       my: 0,
     },
     {
-      icon: <UilTruck size={60} color={"#F6F4EB"} />,
-      title: "Shipped",
-      subTitle: "12",
-      mx: 5,
-      my: 0,
-    },
-    {
-      icon: <UilCheckCircle size={60} color={"#F6F4EB"} />,
-      title: "Delivered",
-      subTitle: "15",
-      mx: 5,
-      my: 0,
-    },
-    {
-      icon: <UilReceipt size={60} color={"#F6F4EB"} />,
+      icon: <ReceiptOutlined sx={{ fontSize: 30  }} />,
       title: "Invoice",
       subTitle: "07",
       mx: 3,

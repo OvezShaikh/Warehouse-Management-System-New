@@ -1,7 +1,21 @@
 import React from 'react';
 import {  Box, Typography, Link, Grid } from '@mui/material';
+import LinkedInIcon from '@mui/icons-material/LinkedIn';
+import TwitterIcon from '@mui/icons-material/Twitter';
+import FacebookIcon from '@mui/icons-material/Facebook';
+import images from "../constants/images";
 
-const Footer = ({ companyName = "Your Company", links = [], socialLinks = [] }) => {
+const Footer = ({ companyName = "Unostar Value Chain Pvt Ltd", links = [
+  { href: '/', label: 'Home' },
+  { href: '/about-Us', label: 'About' },
+  { href: '/contact-us', label: 'Contact' },],
+  socialLinks = [
+    { href: 'https://www.linkedin.com/company/unostarvaluechain?originalSubdomain=in', label: 'LinkedIn', icon: <LinkedInIcon /> },
+    { href: '#', label: 'Twitter', icon: <TwitterIcon /> },
+    { href: '#', label: 'Facebook', icon: <FacebookIcon /> },]
+
+   }) => {
+
   return (
     <Grid container 
       sx={{
@@ -14,6 +28,7 @@ const Footer = ({ companyName = "Your Company", links = [], socialLinks = [] }) 
         width: '100%'
       }}
     >
+      <img src={images.Isologo} className='mr-0'></img>
       <Typography 
         variant="body1" 
         color="primary.contrastText" 

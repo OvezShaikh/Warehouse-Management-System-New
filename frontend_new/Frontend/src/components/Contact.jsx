@@ -1,19 +1,84 @@
-import React from 'react';
+import React, { useState } from 'react';
 import Footer from './FooterComponent';
+import { FaPhone } from "react-icons/fa6";
+import { FaFax } from "react-icons/fa";
+import LinkedInIcon from '@mui/icons-material/LinkedIn';
+import TwitterIcon from '@mui/icons-material/Twitter';
+import FacebookIcon from '@mui/icons-material/Facebook';
+
 
 const ContactSection = () => {
+    const [formData, setFormData] = useState({
+        name: '',
+        email: '',
+        message: '',
+        sendCopy: false
+    });
+
+    const links = [
+        { href: '#', label: 'Home' },
+        { href: '#', label: 'About' },
+        { href: '/contact-us', label: 'Contact' },
+    ];
+
+    const socialLinks = [
+        { href: '#', label: 'LinkedIn', icon: <LinkedInIcon /> },
+        { href: '#', label: 'Twitter', icon: <TwitterIcon /> },
+        { href: '#', label: 'Facebook', icon: <FacebookIcon /> },
+    ];
+
+    const [formStatus, setFormStatus] = useState(null);
+
+    const handleChange = (e) => {
+        const { name, value, type, checked } = e.target;
+        console.log("Input changed:", name, value);
+        setFormData({
+            ...formData,
+            [name]: type === 'checkbox' ? checked : value,
+        });
+    };
+
+    const handleSubmit = async (e) => {
+        e.preventDefault();
+
+        // Send the data to the backend API
+        try {
+            const response = await fetch('/api/contact', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify(formData),
+            });
+
+            const result = await response.json();
+
+            if (response.ok) {
+                setFormStatus({ type: 'success', message: 'Message sent successfully!' });
+                setFormData({ name: '', email: '', message: '', sendCopy: true }); // Reset form after submission
+            } else {
+                setFormStatus({ type: 'error', message: result.message || 'Something went wrong!' });
+            }
+        } catch (error) {
+            setFormStatus({ type: 'error', message: 'Error while sending the message!' });
+        }
+    };
+
+
     return (
         <section className="flex flex-col min-h-screen">
             <div id="map" className="relative h-[300px] overflow-hidden bg-cover bg-[50%] bg-no-repeat">
                 <iframe
-                    src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d561.9638679807683!2d73.79972439589594!3d18.644815529584687!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x3bc2b834124aa203%3A0x6c82c98c2c2120ea!2sUnoStar%20Value%20Chain%20Pvt%20Ltd!5e0!3m2!1sen!2sin!4v1728908806439!5m2!1sen!2sin"
+                    src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d561.9638679807683!2d73.79972439589594!3d18.644815529584687!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x3bc2b834124aa203%3A0x6c82c98c2c2120ea!2sUnoStar%20Value%20Chain%20Pvt%20Ltd!5e0!3m2!1sen!2sin!4v1728908806439!5m2!1sen!2sin&gestureHandling=none"
                     width="100%"
                     height="400"
                     style={{ border: 0 }}
                     allowFullScreen
                     loading="lazy"
+                    draggable="false"
                 ></iframe>
             </div>
+
             <div className="container px-6 md:px-12 mb-20 flex justify-center items-center mx-auto">
                 <div className="block rounded-lg bg-[hsla(0,0%,100%,0.8)] px-6 py-12 shadow-[0_2px_15px_-3px_rgba(0,0,0,0.07),0_10px_20px_-2px_rgba(0,0,0,0.04)] md:py-16 md:px-12 -mt-[100px] backdrop-blur-[30px] border border-gray-300">
                     <div className="flex flex-wrap">
@@ -22,8 +87,10 @@ const ContactSection = () => {
                                 <div className="relative mb-6" data-te-input-wrapper-init>
                                     <input
                                         type="text"
+                                        name="name"
                                         className="peer block min-h-[auto] w-full rounded border-2 bg-transparent py-[0.32rem] px-3 leading-[1.6] outline-none transition-all duration-200 ease-linear focus:placeholder:opacity-100 peer-focus:text-primary"
-                                        id="exampleInput90"
+                                        value={formData.name}
+                                        onChange={handleChange}
                                     />
                                     <label
                                         className="pointer-events-none absolute top-0 left-3 mb-0 max-w-[90%] origin-[0_0] truncate pt-[0.37rem] leading-[1.6] text-neutral-500 transition-all duration-200 ease-out peer-focus:-translate-y-[0.9rem] peer-focus:scale-[0.8] peer-focus:text-primary"
@@ -35,8 +102,10 @@ const ContactSection = () => {
                                 <div className="relative mb-6" data-te-input-wrapper-init>
                                     <input
                                         type="email"
+                                        name="email"
                                         className="peer block min-h-[auto] w-full rounded border-2 bg-transparent py-[0.32rem] px-3 leading-[1.6] outline-none transition-all duration-200 ease-linear focus:placeholder:opacity-100 peer-focus:text-primary"
-                                        id="exampleInput91"
+                                        value={formData.email}
+                                        onChange={handleChange}
                                     />
                                     <label
                                         className="pointer-events-none absolute top-0 left-3 mb-0 max-w-[90%] origin-[0_0] truncate pt-[0.37rem] leading-[1.6] text-neutral-500 transition-all duration-200 ease-out peer-focus:-translate-y-[0.9rem] peer-focus:scale-[0.8] peer-focus:text-primary"
@@ -47,34 +116,46 @@ const ContactSection = () => {
                                 </div>
                                 <div className="relative mb-6" data-te-input-wrapper-init>
                                     <textarea
-                                        className="peer block min-h-[auto] w-full rounded border-2 bg-transparent py-[0.32rem] px-3 leading-[1.6] outline-none transition-all duration-200 ease-linear focus:placeholder:opacity-100"
-                                        id="exampleFormControlTextarea1"
+                                        id="message" // Changed the ID for clarity and reference
+                                        className="peer block min-h-[auto] w-full rounded border-2 bg-transparent py-[0.32rem] px-3 leading-[1.6] outline-none focus:border-primary focus:ring-2 focus:ring-primary transition-all duration-200 ease-linear"
+                                        name="message" // Ensure the name matches the form data key
+                                        value={formData.message}
+                                        onChange={handleChange}
                                         rows="3"
-                                    ></textarea>
+                                    />
                                     <label
-                                        htmlFor="exampleFormControlTextarea1"
+                                        htmlFor="message" // Make sure this corresponds to the ID of the textarea
                                         className="pointer-events-none absolute top-0 left-3 mb-0 max-w-[90%] origin-[0_0] truncate pt-[0.37rem] leading-[1.6] text-neutral-500 transition-all duration-200 ease-out peer-focus:-translate-y-[0.9rem] peer-focus:scale-[0.8] peer-focus:text-primary"
                                     >
                                         Message
                                     </label>
                                 </div>
-                                <div className="mb-6 inline-block min-h-[1.5rem] justify-center pl-[1.5rem] md:flex">
+                                <div className="mb-6  min-h-[1.5rem] flex items-center">
                                     <input
-                                        className="relative float-left mt-[0.15rem] mr-[6px] -ml-[1.5rem] h-[1.125rem] w-[1.125rem] appearance-none rounded-[0.25rem] border-[0.125rem] border-solid border-neutral-300 outline-none"
+                                        className="h-4 w-4 mr-2 border border-neutral-300 rounded-sm  outline-none"
                                         type="checkbox"
-                                        id="exampleCheck96"
-                                        defaultChecked
+                                        name="sendCopy"
+                                        checked={formData.sendCopy}
+                                        onChange={handleChange}
                                     />
-                                    <label className="inline-block pl-[0.15rem] hover:cursor-pointer" htmlFor="exampleCheck96">
+                                    <label className="text-sm text-neutral-700 hover:cursor-pointer" htmlFor="exampleCheck96">
                                         Send me a copy of this message
                                     </label>
                                 </div>
+
                                 <button
-                                    type="button"
+                                    type="submit"
                                     className="mb-6 w-full rounded bg-sky-500 text-white px-6 pt-2.5 pb-2 text-xs font-medium uppercase leading-normal lg:mb-0"
                                 >
                                     Send
                                 </button>
+
+                                {formStatus && (
+                                    <div className={`mt-4 p-2 text-center ${formStatus.type === 'success' ? 'text-green-500' : 'text-red-500'}`}>
+                                        {formStatus.message}
+                                    </div>
+                                )}
+
                             </form>
                         </div>
                         <div className="w-full shrink-0 grow-0 basis-auto lg:w-7/12">
@@ -90,8 +171,33 @@ const ContactSection = () => {
                                         </div>
                                         <div className="ml-6 grow">
                                             <p className="mb-2 font-bold">Technical support</p>
-                                            <p className="text-sm text-neutral-500">example@gmail.com</p>
-                                            <p className="text-sm text-neutral-500">1-600-890-4567</p>
+                                            <a href="mailto:sales@unostar.in" className="text-sm text-neutral-500">
+                                                sales@unostar.in
+                                            </a>
+                                            {/* <p className="text-sm text-neutral-500">020 - 27451946</p> */}
+
+                                            <div className="flex flex-col space-y-4">
+                                                {/* Phone Number */}
+                                                <div className="flex items-center mt-2">
+                                                    {/* <svg xmlns="http://www.w3.org/2000/svg" className="w-5 h-5 text-gray-500" viewBox="0 0 24 24" fill="currentColor">
+                                                        <path fillRule="evenodd" d="M2.7 5.4A17.5 17.5 0 0118.6 21.3c1.2-1.2 1.7-2.8 1.2-4.4l-1-3.5c-.3-1.2-1.5-2-2.8-1.8l-3.5.7a2 2 0 01-2.2-1l-1.7-2.6a2 2 0 00-2.2-1l-3.5.7c-1.5.3-2.7-1-2.8-2.5l-.2-2c-.1-1.5 1-2.8 2.5-3z" clipRule="evenodd" />
+                                                    </svg> */}
+                                                    <FaPhone />
+                                                    <p className="text-sm text-neutral-500 ml-2">020 - 27451946</p>
+                                                </div>
+
+                                                {/* Fax Number */}
+                                                <div className="flex items-center">
+                                                    {/* <svg xmlns="http://www.w3.org/2000/svg" className="w-5 h-5 text-gray-500" viewBox="0 0 24 24" fill="currentColor">
+                                                        <path fillRule="evenodd" d="M6.75 3a.75.75 0 000 1.5h10.5a.75.75 0 000-1.5H6.75zM3.75 6A2.25 2.25 0 006 8.25v7.5A2.25 2.25 0 003.75 18H3a2.25 2.25 0 01-2.25-2.25v-6A2.25 2.25 0 013 7.5h.75zM9 12.75A.75.75 0 019 15h6a.75.75 0 000-1.5H9zm.75 3a.75.75 0 000 1.5h4.5a.75.75 0 000-1.5h-4.5zM9 9a.75.75 0 01.75-.75h4.5a.75.75 0 010 1.5h-4.5A.75.75 0 019 9zm10.5-1.5h.75a2.25 2.25 0 012.25 2.25v6A2.25 2.25 0 0120.25 18h-.75a2.25 2.25 0 01-2.25-2.25v-7.5A2.25 2.25 0 0117.25 6z" clipRule="evenodd" />
+                                                    </svg> */}
+                                                    <FaFax />
+                                                    <p className="text-sm text-neutral-500 ml-2">020 - 27451947</p>
+                                                </div>
+                                            </div>
+
+
+
                                         </div>
                                     </div>
                                 </div>
@@ -106,8 +212,10 @@ const ContactSection = () => {
                                         </div>
                                         <div className="ml-6 grow">
                                             <p className="mb-2 font-bold">Office address</p>
-                                            <p className="text-sm text-neutral-500">123 Main St, Suite 100</p>
-                                            <p className="text-sm text-neutral-500">San Francisco, CA 94105</p>
+                                            <p className="text-sm text-neutral-500"> D-II Block, Plot No. SEI - 1/2,
+                                                2nd Floor Opp. Dali & Sameer Co.
+                                                Chinchwad MIDC</p>
+                                            <p className="text-sm text-neutral-500">Pune - 411019 Maharashtra, India</p>
                                         </div>
                                     </div>
                                 </div>
@@ -115,11 +223,11 @@ const ContactSection = () => {
                         </div>
                     </div>
                 </div>
-            </div>
-            
-                <Footer />
-            
-        </section>
+            </div >
+
+            <Footer />
+
+        </section >
     );
 };
 

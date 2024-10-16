@@ -8,14 +8,29 @@ import {
   Avatar,
   Paper,
 } from '@mui/material';
+import { Link, useNavigate } from 'react-router-dom';
+import { useAuth } from './AuthContext';
 
 const ProfilePage = () => {
+  const navigate = useNavigate();
+  const { isLoggedIn, userName, logout } = useAuth();
   // Sample user data
   const user = {
     name: 'John Doe',
     email: 'john.doe@example.com',
     bio: 'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Proin sit amet lacus ac arcu posuere condimentum.',
     profilePicture: 'https://via.placeholder.com/150', // Placeholder image
+  };
+
+  const handleLogout = async () => {
+    await fetch('/api/logout', {
+      method: 'POST',
+      headers: {
+        Authorization: `Bearer ${localStorage.getItem('token')}`,
+      },
+    });
+    logout(); // Use the logout function from context
+    navigate('/'); // Redirect after logout
   };
 
   return (
@@ -43,7 +58,7 @@ const ProfilePage = () => {
               <Button variant="contained" color="primary">
                 Edit Profile
               </Button>
-              <Button variant="outlined" color="secondary">
+              <Button variant="outlined" color="secondary" onClick={handleLogout}>
                 Logout
               </Button>
             </Box>

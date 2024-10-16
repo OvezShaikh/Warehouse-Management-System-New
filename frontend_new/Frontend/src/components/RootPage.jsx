@@ -102,7 +102,7 @@ export default function RootPage() {
         <TeamComponent />
       </Box>
         <div>
-        <Footer companyName="Your Company" links={links} socialLinks={socialLinks} />
+        <Footer />
         </div>
       
 
