@@ -27,7 +27,7 @@ import images from "../constants/images";
 import { useAuth } from '../AuthContext'; // Import the useAuth hook
 
 export default function NavBarComponent() {
-  const { isLoggedIn, userName, logout } = useAuth(); // Use context
+  const { isLoggedIn, username, profilePicture, logout } = useAuth(); // Add profilePicture
   const [notificationAnchorEl, setNotificationAnchorEl] = useState(null); // State for notification dropdown
   const [anchorEl, setAnchorEl] = useState(null);
   const [servicesAnchorEl, setServicesAnchorEl] = useState(null); // State for the Services dropdown
@@ -48,6 +48,10 @@ export default function NavBarComponent() {
     setServicesAnchorEl(event.currentTarget); // Open services dropdown
   };
 
+  const handleDashboardClicked = () => {
+    navigate('/home');
+  }
+
   const handleClose = () => {
     setAnchorEl(null);
   };
@@ -61,14 +65,19 @@ export default function NavBarComponent() {
   };
 
   const handleLogout = async () => {
-    await fetch('/api/logout', {
+    try {
+    await fetch(`${import.meta.env.VITE_API_URL}/api/auth/logout`, {
       method: 'POST',
       headers: {
         Authorization: `Bearer ${localStorage.getItem('token')}`,
       },
     });
+    localStorage.removeItem('token');
     logout(); // Use the logout function from context
     navigate('/'); // Redirect after logout
+  } catch (error) {
+    console.error('Logout failed:', error);
+}
   };
 
   const handleSettingsClick = () => {
@@ -184,6 +193,17 @@ export default function NavBarComponent() {
                           Notification number 3
                         </MenuItem>
                       </Menu>
+
+                      <Button
+                        onClick={handleDashboardClicked}
+                        sx={{
+                          fontSize: { xs: '0.875rem', md: '1.0rem' },
+                          color: 'white',
+                          cursor: 'pointer',
+                        }}
+                      >
+                        Dashboard
+                      </Button>
 
                       {/* Services Dropdown */}
                       <Button
@@ -335,8 +355,10 @@ export default function NavBarComponent() {
 
                       <IconButton onClick={handleAvatarClicked} size="small" aria-haspopup="true">
                         <Tooltip title="account settings">
-                          <Avatar sx={{ width: { xs: 20, md: 32 }, height: { xs: 25, md: 32 } }}>
-                            {userName[0]}
+                          <Avatar
+                          src={profilePicture ? `http://localhost:5000${profilePicture}` : ''}
+                          sx={{ width: { xs: 20, md: 32 }, height: { xs: 25, md: 32 } }}>
+                          {username.charAt(0)}
                           </Avatar>
                         </Tooltip>
                       </IconButton>
@@ -347,7 +369,7 @@ export default function NavBarComponent() {
                         }}
                         fontFamily={"Inter"}
                       >
-                        {userName}
+                        {username || "Guest"}
                       </Typography>
 
                       <Menu

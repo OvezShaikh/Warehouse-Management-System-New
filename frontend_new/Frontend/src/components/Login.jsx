@@ -8,26 +8,32 @@ export default function Login() {
   const [username, setUsername] = useState(''); 
   const [password, setPassword] = useState('');
   const [error, setError] = useState(null);
+  const [showPassword, setShowPassword] = useState(false); // State for toggling password visibility
   const navigate = useNavigate();
   const { login } = useAuth(); // Use the login function from context
 
   const handleLogin = async () => {
-    setError(null);
+    setError(null);  // Clear any previous errors
+
     try {
       const response = await axios.post(`${import.meta.env.VITE_API_URL}/api/auth/login`, {
         username,
         password,
       });
 
-      const data = response.data;
-      login(data.token, username); // Call the login function from context
-      navigate('/'); // Redirect to the home page after successful login
+      // console.log('Response:', response.data);
       
+      const data = response.data;
+      login(data.token);  // Use the login method to set token and auth state
+      // console.log('login token',data.token);
+      navigate('/home');  // Redirect to home page after successful login
     } catch (error) {
       if (error.response) {
+        // Server error - likely an issue with credentials
         setError(error.response.data.message || 'Login failed. Please check your credentials.');
       } else {
-        setError('An error occurred during login.');
+        // Client-side or network error
+        setError('An error occurred during login. Please try again.');
       }
     }
   };

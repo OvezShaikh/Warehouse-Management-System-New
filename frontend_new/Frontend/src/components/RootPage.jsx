@@ -14,8 +14,8 @@ import Footer from "./FooterComponent";
 
 export default function RootPage() {
   const links = [
-    { href: '#', label: 'Home' },
-    { href: '#', label: 'About' },
+    { href: '/', label: 'Home' },
+    { href: '/about-Us', label: 'About' },
     { href: '/contact-us', label: 'Contact' },
   ];
 

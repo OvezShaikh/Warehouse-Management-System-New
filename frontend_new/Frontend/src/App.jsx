@@ -24,7 +24,7 @@ import Order from "./components/bodyComponents/order/Order";
 import OrderModal from "./components/bodyComponents/order/OrderModal";
 import Login from "./components/Login";
 import Register from "./components/Register";
-import ProfilePage from "./ProfilePage";
+import ProfilePage from "./components/ProfilePage";
 import ContactSection from "./components/Contact";
 import AboutUs from "./components/AboutUs";
 import { ToastContainer } from 'react-toastify'; // Import ToastContainer
