@@ -1,30 +1,33 @@
-import { Box, Button, IconButton, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Typography, Grid, Select, MenuItem, InputLabel, FormControl } from "@mui/material";
-import React, { useState, useEffect } from "react";
+import { Box, Button, IconButton, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Typography, Grid, Select, MenuItem, InputLabel, FormControl, Paper, Divider, TextField } from "@mui/material";
+import React, { useState, useEffect, useRef } from "react";
 import { DeleteOutline } from "@mui/icons-material";
-import html2pdf from "html2pdf.js";  // Import html2pdf
+import jsPDF from "jspdf";
+import "jspdf-autotable";
+// import RobotoBold from './Roboto-Regular-bold';
+import fontData from './Roboto-Regular.ttf';
 
 export default function OrderModal({ order }) {
   const [products, setProducts] = useState(order.products);
-  const [availableProducts, setAvailableProducts] = useState([]); // State for dynamic products
-  const [loading, setLoading] = useState(true); // Loading state for fetching products
-  const [error, setError] = useState(null); // Error state for fetching products
+  const [availableProducts, setAvailableProducts] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+  const [customerFirstName, setCustomerFirstName] = useState(order.customer.firstName);
+  const [customerLastName, setCustomerLastName] = useState(order.customer.lastName);
+  const invoiceRef = useRef(null);
 
-  // Fetch available products from the API
   useEffect(() => {
     const fetchProducts = async () => {
       try {
-        // Replace with your actual API endpoint
-        const response = await fetch(`${import.meta.env.VITE_API_URL}/api/products`); 
+        const response = await fetch(`${import.meta.env.VITE_API_URL}/api/products`);
         const data = await response.json();
-        setAvailableProducts(data); // Assuming the API returns an array of products
+        setAvailableProducts(data);
         setLoading(false);
       } catch (error) {
         console.error("Error fetching products:", error);
-        setError('Failed to load products');
+        setError("Failed to load products");
         setLoading(false);
       }
     };
-
     fetchProducts();
   }, []);
 
@@ -40,7 +43,7 @@ export default function OrderModal({ order }) {
     const updatedProducts = [...products];
     if (field === "name") {
       updatedProducts[index].product.name = value;
-      const selectedProduct = availableProducts.find(p => p.name === value);
+      const selectedProduct = availableProducts.find((p) => p.name === value);
       updatedProducts[index].product.id = selectedProduct ? selectedProduct.id : "";
       updatedProducts[index].product.amount = selectedProduct ? selectedProduct.amount : 0;
     } else if (field === "quantity") {
@@ -51,52 +54,70 @@ export default function OrderModal({ order }) {
     setProducts(updatedProducts);
   };
 
-  // Function to download the invoice as a PDF
-  const downloadInvoice = () => {
-    const element = document.getElementById("invoice"); // Get the invoice content
-    html2pdf()
-      .from(element) // Create PDF from the content
-      .save(`Order_${order.id}_Invoice.pdf`); // Save the file
-  };
-
   const calculateTotalAmount = () => {
-    return products.reduce((total, product) => total + (product.product.amount * product.quantity), 0);
+    return products.reduce((total, product) => total + product.product.amount * product.quantity, 0);
   };
 
-  if (loading) {
-    return <Typography>Loading products...</Typography>;
-  }
+  const downloadInvoice = () => {
+    const doc = new jsPDF();
+    doc.addFont(fontData, 'RobotoRegular', 'normal');
 
-  if (error) {
-    return <Typography color="error">{error}</Typography>;
-  }
+    doc.setFont('RobotoRegular');
+    doc.setFontSize(16);
+    doc.text(`Order Invoice - ${order.id}`, 10, 10);
+
+    doc.setFontSize(12);
+    doc.text(`Customer: ${customerFirstName} ${customerLastName}`, 10, 20);
+    doc.text(`Mobile: ${order.customer.mobile}`, 10, 30);
+    doc.text(`Total Products: ${products.length}`, 10, 40);
+
+    doc.autoTable({
+      startY: 50,
+      head: [["Product Name", "Quantity", "Stock", "Amount"]],
+      body: products.map((product) => [
+        product.product.name,
+        product.quantity,
+        product.product.stock,
+        `${product.product.amount}`,
+      ]),
+    });
+
+    doc.text(`Total Amount: ${"\u20B9"}${calculateTotalAmount()}`, 10, doc.lastAutoTable.finalY + 10);
+    doc.setFont('RobotoRegular');
+    doc.save(`Order_${order.id}_Invoice.pdf`);
+  };
+
+  if (loading) return <Typography>Loading products...</Typography>;
+  if (error) return <Typography color="error">{error}</Typography>;
 
   return (
     <Box
       sx={{
-        position: 'fixed', // Fixed positioning on the screen
-        top: '50%', // Center vertically
-        left: '50%', // Center horizontally
-        transform: 'translate(-50%, -50%)', // Adjust for exact centering
-        width: '80vw', // Modal width (can adjust as necessary)
-        maxWidth: '800px', // Maximum width of the modal
-        height: '80vh', // Modal height (can adjust as necessary)
-        maxHeight: '90vh', // Maximum height (to ensure the modal does not grow too large)
-        bgcolor: 'white',
+        position: "fixed",
+        top: "50%",
+        left: "50%",
+        transform: "translate(-50%, -50%)",
+        width: "80vw",
+        maxWidth: "800px",
+        height: "80vh",
+        maxHeight: "90vh",
+        bgcolor: "white",
         borderRadius: 2,
-        overflow: 'auto', // Makes content scrollable if it overflows
+        overflow: "auto",
         padding: 4,
-        zIndex: 1300, // Make sure the modal is on top of other elements
+        zIndex: 1300,
       }}
     >
-      <Typography variant="h6">Order List</Typography>
-      <TableContainer sx={{ marginTop: 2 }}>
+      <Typography variant="h5">Order List</Typography>
+      <Divider sx={{ my: 2 }} />
+
+      <TableContainer component={Paper} sx={{ marginBottom: 4 }}>
         <Table>
           <TableHead>
             <TableRow>
               <TableCell>Product Name</TableCell>
               <TableCell>Quantity</TableCell>
-              <TableCell>Stock Availability</TableCell>
+              <TableCell>Stock</TableCell>
               <TableCell>Amount</TableCell>
               <TableCell>Action</TableCell>
             </TableRow>
@@ -111,7 +132,6 @@ export default function OrderModal({ order }) {
                       value={product.product.name}
                       onChange={(e) => handleProductChange(index, "name", e.target.value)}
                     >
-                      {/* Loop through available products and display as options */}
                       {availableProducts.map((availableProduct) => (
                         <MenuItem key={availableProduct.id} value={availableProduct.name}>
                           {availableProduct.name}
@@ -121,20 +141,22 @@ export default function OrderModal({ order }) {
                   </FormControl>
                 </TableCell>
                 <TableCell>
-                  <input
+                  <TextField
                     type="number"
                     value={product.quantity}
                     onChange={(e) => handleProductChange(index, "quantity", e.target.value)}
                     placeholder="Quantity"
+                    fullWidth
                   />
                 </TableCell>
                 <TableCell>{product.product.stock}</TableCell>
                 <TableCell>
-                  <input
+                  <TextField
                     type="number"
                     value={product.product.amount}
                     onChange={(e) => handleProductChange(index, "amount", e.target.value)}
                     placeholder="Amount"
+                    fullWidth
                   />
                 </TableCell>
                 <TableCell>
@@ -147,58 +169,70 @@ export default function OrderModal({ order }) {
           </TableBody>
         </Table>
       </TableContainer>
-      <Button variant="contained" onClick={handleAddProduct} sx={{ marginTop: 2 }}>
+      <Button variant="contained" onClick={handleAddProduct} sx={{ mb: 2 }}>
         Add Product
       </Button>
 
-      {/* Section for Invoice */}
-      <Box sx={{ marginTop: 2 }}>
-        <Typography variant="h6">Invoice</Typography>
-        <Box id="invoice" sx={{ padding: 2, marginTop: 2 }}>
-          <Grid container spacing={2}>
-            <Grid item>
-              <Typography variant="subtitle1"><strong>Order ID:</strong> {order.id}</Typography>
-            </Grid>
-            <Grid item>
-              <Typography variant="subtitle1"><strong>Customer:</strong> {order.customer.firstName} {order.customer.lastName}</Typography>
-            </Grid>
-            <Grid item>
-              <Typography variant="subtitle1"><strong>Mobile:</strong> {order.customer.mobile}</Typography>
-            </Grid>
-            <Grid item>
-              <Typography variant="subtitle1"><strong>Total Products:</strong> {products.length}</Typography>
-            </Grid>
+      <Typography variant="h5">Invoice</Typography>
+      <Divider sx={{ my: 2 }} />
+
+      <Box sx={{ marginBottom: 4 }} ref={invoiceRef}>
+        <Grid container spacing={2} sx={{ marginBottom: 2 }}>
+          <Grid item xs={6}>
+            <TextField
+              label="First Name"
+              value={customerFirstName}
+              onChange={(e) => setCustomerFirstName(e.target.value)}
+              fullWidth
+            />
           </Grid>
+          <Grid item xs={6}>
+            <TextField
+              label="Last Name"
+              value={customerLastName}
+              onChange={(e) => setCustomerLastName(e.target.value)}
+              fullWidth
+            />
+          </Grid>
+          <Grid item xs={6}>
+            <Typography variant="subtitle1"><strong>Order ID:</strong> {order.id}</Typography>
+          </Grid>
+          <Grid item xs={6}>
+            <Typography variant="subtitle1"><strong>Mobile:</strong> {order.customer.mobile}</Typography>
+          </Grid>
+          <Grid item xs={6}>
+            <Typography variant="subtitle1"><strong>Total Products:</strong> {products.length}</Typography>
+          </Grid>
+        </Grid>
 
-          <TableContainer sx={{ marginTop: 2 }}>
-            <Table>
-              <TableHead>
-                <TableRow>
-                  <TableCell>Product Name</TableCell>
-                  <TableCell>Quantity</TableCell>
-                  <TableCell>Stock Availability</TableCell>
-                  <TableCell>Amount</TableCell>
+        <TableContainer component={Paper} sx={{ mb: 2 }}>
+          <Table>
+            <TableHead>
+              <TableRow>
+                <TableCell>Product Name</TableCell>
+                <TableCell>Quantity</TableCell>
+                <TableCell>Stock Availability</TableCell>
+                <TableCell>Amount</TableCell>
+              </TableRow>
+            </TableHead>
+            <TableBody>
+              {products.map((product, index) => (
+                <TableRow key={index}>
+                  <TableCell>{product.product.name}</TableCell>
+                  <TableCell>{product.quantity}</TableCell>
+                  <TableCell>{product.product.stock}</TableCell>
+                  <TableCell>{`${"\u20B9"}${product.product.amount}`}</TableCell>
                 </TableRow>
-              </TableHead>
-              <TableBody>
-                {products.map((product, index) => (
-                  <TableRow key={index}>
-                    <TableCell>{product.product.name}</TableCell>
-                    <TableCell>{product.quantity}</TableCell>
-                    <TableCell>{product.product.stock}</TableCell>
-                    <TableCell>{product.product.amount}</TableCell>
-                  </TableRow>
-                ))}
-              </TableBody>
-            </Table>
-          </TableContainer>
+              ))}
+            </TableBody>
+          </Table>
+        </TableContainer>
 
-          <Typography variant="subtitle1" sx={{ marginTop: 2 }}><strong>Total Amount: ₹{calculateTotalAmount()}</strong></Typography>
-        </Box>
-        <Button variant="contained" onClick={downloadInvoice} sx={{ marginTop: 2 }}>
-          Download Invoice
-        </Button>
+        <Typography variant="subtitle1"><strong>Total Amount: {`${"\u20B9"}${calculateTotalAmount()}`}</strong></Typography>
       </Box>
+      <Button variant="contained" onClick={downloadInvoice} sx={{ mt: 2 }}>
+        Download Invoice
+      </Button>
     </Box>
   );
 }

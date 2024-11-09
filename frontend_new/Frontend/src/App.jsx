@@ -1,10 +1,8 @@
-import React from "react";
-import Inter from "../public/static/fonts/Inter.ttf";
+import React, { useState, useEffect } from "react"; // Import useState and useEffect
+import Inter from "../public/static/fonts/static/Inter.ttf";
 import { ThemeProvider, CssBaseline, createTheme, Box } from "@mui/material";
 import RootComponent from "./components/RootComponent";
 import RootPage from "./components/RootPage";
-import DataTable from "./test/DataTable";
-import Hello from "./test/Hello";
 import "../app.css";
 import {
   Route,
@@ -27,17 +25,40 @@ import Register from "./components/Register";
 import ProfilePage from "./components/ProfilePage";
 import ContactSection from "./components/Contact";
 import AboutUs from "./components/AboutUs";
+import GRNComponent from "./components/bodyComponents/grn_component/GRNPage";
+import QualityCheck from "./components/bodyComponents/Qualitycomponent/QualityCheckPage";
+import Careers from "./components/Carrers";
+import AddDockLocation from "./components/bodyComponents/DockLoc/Doclocation";
 import { ToastContainer } from 'react-toastify'; // Import ToastContainer
-import 'react-toastify/dist/ReactToastify.css'; // Import the CSS
+import 'react-toastify/dist/ReactToastify.css'; // Import ToastContainer CSS
 
 function App() {
+  const [grnData, setGrnData] = useState([]);
+  const [loading, setLoading] = useState(true);  // Loading state
+  const [error, setError] = useState(null);      // Error state
+
+  useEffect(() => {
+    const fetchGrnData = async () => {
+      try {
+        const response = await fetch(`${import.meta.env.VITE_API_URL}/api/grn`);
+        const result = await response.json();
+        console.log("Fetched GRN Data:", result);
+        setGrnData(result.grns); // Pass the 'grns' array to your component
+      } catch (error) {
+        console.error("Error fetching GRN data:", error);
+      }
+    };
+  
+    fetchGrnData();
+  }, []);
+
   const theme = createTheme({
     spacing: 4,
     palette: {
       mode: "light",
     },
     typography: {
-      fontFamily: "Inter",
+      fontFamily: "Roboto, Inter, Arial, sans-serif",
     },
     components: {
       MuiCssBaseline: {
@@ -46,8 +67,8 @@ function App() {
             font-family: 'Inter';
             font-style: normal;
             font-display: swap;
-            font-weight: 400;
-            src: local('Raleway'), local('Raleway-Regular'), url(${Inter}) format('woff2');
+            font-weight: 300;
+            src: local('Raleway'), local('Raleway-Regular'), url(${Inter}) format('truetype');
             unicodeRange: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+2000-206F, U+2074, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF;
           }
         `,
@@ -60,6 +81,8 @@ function App() {
       <Route path="/" element={<RootComponent />}>
         <Route index element={<RootPage />} />
         <Route path="/home" element={<Home />} />
+        <Route path="/grn" element={<GRNComponent grnData={grnData} setGrnData={setGrnData} />} />
+        <Route path="/qualitycheck" element={<QualityCheck grnData={grnData} setGrnData={setGrnData} />} />
         <Route path="/register" element={<Register />} />
         <Route path="/login" element={<Login />} />
         <Route path="/inventory" element={<Inventory />} />
@@ -71,7 +94,9 @@ function App() {
         <Route path="/settings" element={<Setting />} />
         <Route path="/profile" element={<ProfilePage />} />
         <Route path="/contact-us" element={<ContactSection />} />
-        <Route path="/about-Us" element={<AboutUs />} />
+        <Route path="/about-us" element={<AboutUs />} />
+        <Route path="/careers" element={<Careers />} />
+        <Route path="/dock-locations" element={<AddDockLocation />} />
       </Route>
     )
   );

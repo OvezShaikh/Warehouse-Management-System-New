@@ -17,6 +17,8 @@ import {
   CardTravelOutlined,
   TrendingUpOutlined,
   PeopleAltOutlined,
+  ThumbUpOffAltOutlined,
+  AddLocationAltOutlined,
 } from "@mui/icons-material";
 import { useLocation, useNavigate } from "react-router-dom";
 
@@ -28,12 +30,17 @@ const SideBarComponent = () => {
   const sideBarComponent = [
     { title: "Home", component: <HomeOutlined fontSize="medium" color="primary" /> },
     { title: "Inventory", component: <Inventory2Outlined fontSize="medium" color="primary" /> },
+    { title: "Dock-Locations", component: <AddLocationAltOutlined fontSize="medium" color="primary" /> },
+    { title: "GRN", component: <DescriptionOutlined fontSize="medium" color="primary" /> },
+    { title: "QualityCheck", component: <ThumbUpOffAltOutlined fontSize="medium" color="primary" /> },
     { title: "Orders", component: <CardTravelOutlined fontSize="medium" color="primary" /> },
     { title: "Customers", component: <PeopleAltOutlined fontSize="medium" color="primary" /> },
     { title: "Revenue", component: <MonetizationOnOutlined fontSize="medium" color="primary" /> },
     { title: "Growth", component: <TrendingUpOutlined fontSize="medium" color="primary" /> },
     { title: "Reports", component: <DescriptionOutlined fontSize="medium" color="primary" /> },
     { title: "Settings", component: <SettingsOutlined fontSize="medium" color="primary" /> },
+    // Add the GRN entry here
+     // You can change the icon as needed
   ];
 
   const [selected, setSelected] = useState(currentPage);

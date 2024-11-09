@@ -1,10 +1,9 @@
 import productList from "../inventory/productList";
 
 const customer = {
-    firstName: "ADMI",
-    lastName: "ZAKARYAE",
-    position: "Software Engineer",
-    mobile: "+212 6 51 88 61 51",
+    firstName: "Unostar",
+    lastName: "Value Chain Pvt Ltd",
+    mobile: "+020 - 27451946",
   };
 
   const orders = [
@@ -67,60 +66,7 @@ const customer = {
       products: [{quantity:5,product:productList[9]}, {quantity:5,product:productList[1]},{quantity:5,product: productList[2]}],
       customer: customer,
     },
-    {
-      id: 11,
-     
-      products: [{quantity:5,product:productList[10]},{quantity:5,product: productList[1]},{quantity:5,product: productList[2]}],
-      customer: customer,
-    },
-    {
-      id: 12,
-    
-      products: [{quantity:5,product:productList[11]},{quantity:5,product: productList[1]},{quantity:5,product: productList[2]}],
-      customer: customer,
-    },
-    {
-      id: 13,
    
-      products: [{quantity:5,product:productList[12]},{quantity:5,product: productList[1]},{quantity:5,product: productList[2]}],
-      customer: customer,
-    },
-    {
-      id: 14,
-    
-      products: [{quantity:5,product:productList[0]}, {quantity:5,product:productList[1]},{quantity:5,product: productList[2]}],
-      customer: customer,
-    },
-    {
-      id: 15,
-     
-      products: [{quantity:5,product:productList[12]},{quantity:5,product: productList[1]},{quantity:5,product: productList[2]}],
-      customer: customer,
-    },
-    {
-      id: 16,
-     
-      products: [{quantity:5,product:productList[3]}, {quantity:5,product:productList[1]},{quantity:5,product: productList[2]}],
-      customer: customer,
-    },
-    {
-      id: 17,
-     
-      products: [{quantity:5,product:productList[5]}, {quantity:5,product:productList[1]},{quantity:5,product: productList[2]}],
-      customer: customer,
-    },
-    {
-      id: 18,
-    
-      products: [{quantity:5,product:productList[6]}, {quantity:5,product:productList[1]},{quantity:5,product: productList[2]}],
-      customer: customer,
-    },
-    {
-      id: 19,
-     
-      products: [{quantity:5,product:productList[8]}, {quantity:5,product:productList[1]},{quantity:5,product: productList[2]}],
-      customer: customer,
-    },
   ];
 
   export default orders;

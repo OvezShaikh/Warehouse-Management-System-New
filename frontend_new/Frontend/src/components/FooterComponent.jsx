@@ -8,7 +8,9 @@ import images from "../constants/images";
 const Footer = ({ companyName = "Unostar Value Chain Pvt Ltd", links = [
   { href: '/', label: 'Home' },
   { href: '/about-Us', label: 'About' },
-  { href: '/contact-us', label: 'Contact' },],
+  { href: '/contact-us', label: 'Contact' },
+  { href: '/carrers', label: 'Carrers' },
+    ],
   socialLinks = [
     { href: 'https://www.linkedin.com/company/unostarvaluechain?originalSubdomain=in', label: 'LinkedIn', icon: <LinkedInIcon /> },
     { href: '#', label: 'Twitter', icon: <TwitterIcon /> },
