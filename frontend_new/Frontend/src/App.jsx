@@ -1,4 +1,6 @@
 import React, { useState, useEffect } from "react"; // Import useState and useEffect
+import { ToastContainer } from 'react-toastify'; // Import ToastContainer
+import 'react-toastify/dist/ReactToastify.css'; // Import ToastContainer CSS
 import Inter from "../public/static/fonts/static/Inter.ttf";
 import { ThemeProvider, CssBaseline, createTheme, Box } from "@mui/material";
 import RootComponent from "./components/RootComponent";
@@ -29,8 +31,9 @@ import GRNComponent from "./components/bodyComponents/grn_component/GRNPage";
 import QualityCheck from "./components/bodyComponents/Qualitycomponent/QualityCheckPage";
 import Careers from "./components/Carrers";
 import AddDockLocation from "./components/bodyComponents/DockLoc/Doclocation";
-import { ToastContainer } from 'react-toastify'; // Import ToastContainer
-import 'react-toastify/dist/ReactToastify.css'; // Import ToastContainer CSS
+import GRNReport from "./components/bodyComponents/grn_component/GRNReport";
+import LocationManager from "./components/bodyComponents/PutawayLocations/Putawaylocation";
+
 
 function App() {
   const [grnData, setGrnData] = useState([]);
@@ -97,6 +100,8 @@ function App() {
         <Route path="/about-us" element={<AboutUs />} />
         <Route path="/careers" element={<Careers />} />
         <Route path="/dock-locations" element={<AddDockLocation />} />
+        <Route path="/grnreport" element={<GRNReport />} />
+        <Route path="/putaway-locations" element={<LocationManager grnData={grnData} setGrnData={setGrnData} grnItems={grnData}/>} />
       </Route>
     )
   );

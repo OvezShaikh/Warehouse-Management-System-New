@@ -83,7 +83,7 @@ const AddDockLocation = () => {
       )}
 
       {/* Form Section - Align it to the right */}
-      <Grid container direction="column" sx={{ flex: 1, padding: 3 }}>
+      <Grid container direction="column" sx={{ flex: 1, padding: 3 , backgroundColor: 'white'}}>
         <form onSubmit={handleSubmit}>
           <TextField
             label="Dock Code"
