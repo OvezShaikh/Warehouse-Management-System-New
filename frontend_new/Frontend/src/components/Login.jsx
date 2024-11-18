@@ -5,7 +5,7 @@ import { Box, Button, TextField, Typography, Paper, Container } from '@mui/mater
 import { useAuth } from '../AuthContext'; // Import the useAuth hook
 
 export default function Login() {
-  const [username, setUsername] = useState(''); 
+  const [email, setEmail] = useState(''); 
   const [password, setPassword] = useState('');
   const [error, setError] = useState(null);
   const [showPassword, setShowPassword] = useState(false); // State for toggling password visibility
@@ -17,7 +17,7 @@ export default function Login() {
 
     try {
       const response = await axios.post(`${import.meta.env.VITE_API_URL}/api/auth/login`, {
-        username,
+        email,
         password,
       });
 
@@ -25,7 +25,7 @@ export default function Login() {
       
       const data = response.data;
       login(data.token);  // Use the login method to set token and auth state
-      // console.log('login token',data.token);
+      console.log('login token',data.token);
       navigate('/home');  // Redirect to home page after successful login
     } catch (error) {
       if (error.response) {
@@ -50,12 +50,12 @@ export default function Login() {
           </Typography>
         )}
         <TextField
-          label="Username"
+          label="Email"
           fullWidth
           variant="outlined"
           sx={{ mb: 2 }}
-          value={username}
-          onChange={(e) => setUsername(e.target.value)}
+          value={email}
+          onChange={(e) => setEmail(e.target.value)}
         />
         <TextField
           label="Password"
