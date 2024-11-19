@@ -356,7 +356,8 @@ export default function NavBarComponent() {
                       <IconButton onClick={handleAvatarClicked} size="small" aria-haspopup="true">
                         <Tooltip title="account settings">
                           <Avatar
-                          src={profilePicture ? `http://localhost:5000${profilePicture}` : ''}
+                          src={profilePicture ? `${import.meta.env.VITE_API_URL}/${profilePicture}` : ''}
+
                           sx={{ width: { xs: 20, md: 32 }, height: { xs: 25, md: 32 } }}>
                           {username.charAt(0)}
                           </Avatar>

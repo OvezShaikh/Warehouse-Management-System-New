@@ -22,13 +22,14 @@ const ProfilePage = () => {
   useEffect(() => {
     const fetchProfile = async () => {
       const token = localStorage.getItem('token');
+      console.log("Got from profile fet",token);
       if (!token) {
         navigate('/login');
         return;
       }
 
       try {
-        const response = await fetch('/api/auth/profile', {
+        const response = await fetch('/api/settings/profile', {
           method: 'GET',
           headers: {
             'Content-Type': 'application/json',
@@ -90,14 +91,13 @@ const ProfilePage = () => {
     );
   }
 
-  
   return (
     <Container maxWidth="md" sx={{ py: 5 }}>
       <Paper elevation={3} sx={{ padding: 3 }}>
         <Grid container spacing={4}>
           <Grid item xs={12} sm={4} sx={{ display: 'flex', justifyContent: 'center' }}>
             <Avatar
-              src={user.profilePicture ? `/uploads/${user.profilePicture}` : 'https://via.placeholder.com/150'}
+              src={user.profilePicture ? `${process.env.VITE_API_URL}/uploads/${user.profilePicture}` : 'https://via.placeholder.com/150'}
               alt={user.username}
               sx={{ width: 150, height: 150 }}
             />
@@ -113,7 +113,7 @@ const ProfilePage = () => {
               {user.bio || 'No bio available'}
             </Typography>
             <Box sx={{ display: 'flex', gap: 2, mt: 3 }}>
-              <Button variant="contained" color="primary">
+              <Button variant="contained" color="primary" onClick={() => navigate('/edit-profile')}>
                 Edit Profile
               </Button>
               <Button variant="outlined" color="secondary" onClick={handleLogout}>

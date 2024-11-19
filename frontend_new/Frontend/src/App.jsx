@@ -19,7 +19,7 @@ import Customer from "./components/bodyComponents/customer/Customer";
 import Revenue from "./components/bodyComponents/revenue/Revenue";
 import Growth from "./components/bodyComponents/growth/Growth";
 import Report from "./components/bodyComponents/report/Report";
-import Setting from "./components/bodyComponents/Settings/Setting";
+// import Setting from "./components/bodyComponents/Settings/Setting";
 import Order from "./components/bodyComponents/order/Order";
 import OrderModal from "./components/bodyComponents/order/OrderModal";
 import Login from "./components/Login";
@@ -33,6 +33,7 @@ import Careers from "./components/Carrers";
 import AddDockLocation from "./components/bodyComponents/DockLoc/Doclocation";
 import GRNReport from "./components/bodyComponents/grn_component/GRNReport";
 import LocationManager from "./components/bodyComponents/PutawayLocations/Putawaylocation";
+import SettingsPage from "./components/bodyComponents/Settings/Setting";
 
 
 function App() {
@@ -94,7 +95,7 @@ function App() {
         <Route path="/revenue" element={<Revenue />} />
         <Route path="/growth" element={<Growth />} />
         <Route path="/reports" element={<Report />} />
-        <Route path="/settings" element={<Setting />} />
+        <Route path="/settings" element={<SettingsPage />} />
         <Route path="/profile" element={<ProfilePage />} />
         <Route path="/contact-us" element={<ContactSection />} />
         <Route path="/about-us" element={<AboutUs />} />

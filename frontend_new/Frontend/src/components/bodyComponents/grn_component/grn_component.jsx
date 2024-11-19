@@ -480,7 +480,7 @@ const GRNComponent = () => {
       toast.success("Item deleted successfully.");
     } catch (error) {
       console.error("Error deleting item:", error);
-      toast.error("Failed to delete item.");
+      toast.error("Failed to delete item. Check for single Item !!");
     }
   };
 

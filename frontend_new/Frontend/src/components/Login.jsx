@@ -14,18 +14,22 @@ export default function Login() {
 
   const handleLogin = async () => {
     setError(null);  // Clear any previous errors
-
+  
     try {
       const response = await axios.post(`${import.meta.env.VITE_API_URL}/api/auth/login`, {
         email,
         password,
       });
-
-      // console.log('Response:', response.data);
-      
-      const data = response.data;
-      login(data.token);  // Use the login method to set token and auth state
-      console.log('login token',data.token);
+  
+      const { token, username, bio, profilePicture } = response.data;
+  
+      console.log('Login token:', token);
+      console.log('User data:', { username, bio, profilePicture });
+      console.log('Login successful, now navigating to /home');
+  
+      // Use the login method from AuthContext to set token and auth state
+      login(token,  { username, profilePicture });
+  
       navigate('/home');  // Redirect to home page after successful login
     } catch (error) {
       if (error.response) {
@@ -37,6 +41,7 @@ export default function Login() {
       }
     }
   };
+  
 
   return (
     <Container maxWidth="sm">
