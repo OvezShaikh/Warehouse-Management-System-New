@@ -34,9 +34,9 @@ export default function TopSellingProduct() {
           .sort((a, b) => b.quantity - a.quantity); // Sorting by quantity in descending order
 
         // Limiting to the top 10 products
-        const top10Products = formattedProducts.slice(0, 5);
+        const top5Products = formattedProducts.slice(0, 5);
 
-        setProducts(top10Products);
+        setProducts(top5Products);
       } catch (err) {
         setError("Failed to fetch products.");
       } finally {
