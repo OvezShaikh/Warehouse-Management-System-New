@@ -53,7 +53,7 @@ const AddDockLocation = () => {
   };
 
   return (
-    <Box sx={{ display: 'flex' }}>
+    <Box sx={{ display: 'flex' , p: 8 }}>
       {/* Sidebar for small screens */}
       {isSmallScreen && (
         <AppBar position="fixed">

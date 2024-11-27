@@ -1,34 +1,70 @@
 import React, { useEffect, useState } from "react";
 import ApexCharts from "react-apexcharts";
 import { Box } from "@mui/material";
-export default function VisitorsGrowthCharts() {
+import axios from "axios";
+
+export default function VisitorsGrowthCharts({ recordVisitor }) {
   const [visitorData, setVisitorData] = useState([]);
+  const [loading, setLoading] = useState(true);
 
+  const hasRecordedVisitor = sessionStorage.getItem('hasRecordedVisitor'); // Store flag in session storage
+
+
+  // Fetch active and bounce visitor data
   useEffect(() => {
-    setVisitorData([
-      {
-        name: "Active Visitors",
-        type: "column",
-        data: [341, 350, 460, 370, 300, 240, 250],
-      },
-      {
-        name: "Bounce Visitors",
-        type: "column",
-        data: [141, 250, 260, 270, 300, 330, 360],
-      },
-    ]);
+    const fetchVisitorData = async () => {
+      try {
+        const activeResponse = await axios.get(`${import.meta.env.VITE_API_URL}/api/visitors/active`);
+        const bounceResponse = await axios.get(`${import.meta.env.VITE_API_URL}/api/visitors/bounce`);
 
-    return () => {
-      setVisitorData([]);
+        setVisitorData([
+          {
+            name: "Active Visitors",
+            type: "column",
+            data: [activeResponse.data.activeVisitors],
+          },
+          {
+            name: "Bounce Visitors",
+            type: "column",
+            data: [bounceResponse.data.bounceVisitors],
+          },
+        ]);
+        setLoading(false);
+      } catch (error) {
+        console.error("Error fetching visitor data:", error);
+        setLoading(false);
+      }
     };
-  }, []);
+
+    fetchVisitorData();
+
+    // Record the visitor as "active" when the component is mounted
+    if (!hasRecordedVisitor) {
+      recordVisitor("active");
+      sessionStorage.setItem('hasRecordedVisitor', 'true'); // Set flag to prevent re-recording
+    }
+
+    // Record the visitor as "bounce" when they leave the page
+    const handleBeforeUnload = () => {
+      if (!hasRecordedVisitor) {
+        recordVisitor("bounce");
+      }
+    };
+
+    window.addEventListener("beforeunload", handleBeforeUnload);
+
+    // Clean up event listener when component unmounts
+    return () => {
+      window.removeEventListener("beforeunload", handleBeforeUnload);
+    };
+  }, [recordVisitor, hasRecordedVisitor]);
 
   const options3 = {
     colors: ["#A020F0", "#FA6800"],
     chart: {
       id: "basic-bar",
       type: "bar",
-      stacked: false, //one on top of another
+      stacked: false,
     },
     dataLabels: {
       enabled: false,
@@ -38,48 +74,28 @@ export default function VisitorsGrowthCharts() {
       horizontalAlign: "left",
       offsetY: 0,
     },
-    // title: {
-    //   text: "Visitors",
-    // },
     plotOptions: {
       bar: {
-        columnWidth: "15%",
-        horizontal: false,
-        borderRadius: 2,
+        columnWidth: "20%",
       },
-    },
-    fill: {
-      opacity: 1,
     },
     xaxis: {
-      categories: ["Mon", "Thu", "Wed", "Tue", "Fri", "Sat", "Sun"],
-    },
-    tooltip: {
-      fixed: {
-        enabled: true,
-        position: "topLeft", // topRight, topLeft, bottomRight, bottomLeft
-        offsetY: 30,
-        offsetX: 60,
-      },
+      categories: ["Visitors Growth"],
     },
   };
+
   return (
-    <Box
-      sx={{
-        marginX: 4,
-        // bgcolor: "white",
-        borderRadius: 2,
-        padding: 3,
-        height: "100%",
-      }}
-    >
-      <ApexCharts
-        options={options3}
-        series={visitorData}
-        type="bar"
-        width="100%"
-        height={300}
-      />
+    <Box sx={{ margin: 3, height: "350px" }}>
+      {loading ? (
+        <div>Loading...</div>
+      ) : (
+        <ApexCharts
+          options={options3}
+          series={visitorData}
+          type="bar"
+          height="350"
+        />
+      )}
     </Box>
   );
 }

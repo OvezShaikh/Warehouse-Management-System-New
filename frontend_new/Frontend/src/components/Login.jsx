@@ -11,6 +11,7 @@ export default function Login() {
   const [showPassword, setShowPassword] = useState(false); // State for toggling password visibility
   const navigate = useNavigate();
   const { login } = useAuth(); // Use the login function from context
+  const [isLoggedIn,setIsLoggedIn] = useState(false);
 
   const handleLogin = async () => {
     setError(null);  // Clear any previous errors
@@ -26,6 +27,7 @@ export default function Login() {
       console.log('Login token:', token);
       console.log('User data:', { username, bio, profilePicture });
       console.log('Login successful, now navigating to /home');
+      setIsLoggedIn(true);
   
       // Use the login method from AuthContext to set token and auth state
       login(token,  { username, profilePicture });

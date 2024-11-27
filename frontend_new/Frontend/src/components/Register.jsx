@@ -177,7 +177,10 @@ export default function Register() {
         </Select>
 
         {/* Profile Picture Upload */}
-        <input type="file" onChange={handleFileChange} />
+        <Typography variant="h6" sx={{ mb: 1 }}>
+          Profile Picture
+        </Typography>
+        <input style={{margin: '10px'}} type="file" onChange={handleFileChange} />
         {croppedImage && (
           <div>
             <img src={croppedImage} alt="Cropped" style={{ width: '100%', marginTop: '10px' }} />

@@ -29,6 +29,7 @@ export const AuthProvider = ({ children }) => {
         }
       } catch (error) {
         console.error("Invalid token:", error);
+        setIsLoggedIn(false);
         logout();
       }
     }
@@ -57,6 +58,8 @@ export const AuthProvider = ({ children }) => {
     setUserRole("");
     setProfilePicture("");
   };
+
+  
 
   // Return loading state to handle UI rendering
   if (loading) {

@@ -10,11 +10,22 @@ import {
   CardContent,
   Typography,
   CircularProgress,
+  Box,
+  Grid,
+  AppBar,
+  Toolbar,
+  IconButton,
+  Drawer,
+  useMediaQuery,
 } from '@mui/material';
 import axios from 'axios';
+import MenuIcon from '@mui/icons-material/Menu';
+import CloseIcon from '@mui/icons-material/Close';
 import SideBarComponent from '../../SideBarComponent';
+import NavBarComponent from '../../NavBarComponent';
 import { toast, ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
+import { useAuth } from "../../../AuthContext";
 
 const LocationManager = ({ grnItems }) => {
   const [locations, setLocations] = useState([]);
@@ -23,6 +34,10 @@ const LocationManager = ({ grnItems }) => {
   const [capacity, setCapacity] = useState('');
   const [selectedLocation, setSelectedLocation] = useState(null);
   const [loading, setLoading] = useState(false);
+  const [drawerOpen, setDrawerOpen] = useState(false);
+  const isSmallScreen = useMediaQuery((theme) => theme.breakpoints.down('md'));
+  const { userRole } = useAuth();
+
 
   // Fetch locations from API
   const fetchLocations = async () => {
@@ -50,7 +65,7 @@ const LocationManager = ({ grnItems }) => {
     }
 
     try {
-      const response = await axios.post(`${import.meta.env.VITE_API_URL}/api/location`, {
+      const response = await axios.post(`${import.meta.env.VITE_API_URL}/api/locations`, {
         locationCode,
         capacity,
       });
@@ -67,7 +82,7 @@ const LocationManager = ({ grnItems }) => {
 
   // Update stock for the selected location manually
   const handleUpdateStock = async (increment) => {
-      console.log('Selected Location ID:', selectedLocation._id);
+    console.log('Selected Location ID:', selectedLocation._id);
     if (!selectedLocation) return;
 
     const updatedStock = increment
@@ -129,94 +144,130 @@ const LocationManager = ({ grnItems }) => {
   };
 
   return (
-    <div className="p-8 space-y-1 flex">
-      <ToastContainer />
-      <SideBarComponent />
-      <div className="w-full bg-slate-100">
-        <h1 className="text-2xl font-semibold">Manage Locations</h1>
+    <Box sx={{ display: 'flex', margin: 6, padding: 3, height: '100vh' }}>
 
-        <Button variant="outlined" color="primary" onClick={() => setOpenAddLocationDialog(true)}>
-          Add New Location
-        </Button>
+      {/* AppBar for small screens */}
+      {isSmallScreen && (
+        <AppBar position="fixed">
+          <Toolbar sx={{ height: '80px' }}>
+            <IconButton edge="start" color="inherit" onClick={() => setDrawerOpen(true)}>
+              <MenuIcon />
+            </IconButton>
+          </Toolbar>
+        </AppBar>
+      )}
 
-        <Button
-          variant="contained"
-          color="primary"
-          onClick={handleUpdateStockWithGRN}
-          className="ml-4"
-        >
-          Update Stock from GRN
-        </Button>
+      {/* Drawer for small screens */}
+      <Drawer anchor="left" open={drawerOpen} onClose={() => setDrawerOpen(false)}>
+        <Box sx={{ width: 250 }}>
+          <IconButton onClick={() => setDrawerOpen(false)}>
+            <CloseIcon />
+          </IconButton>
+          <SideBarComponent />
+        </Box>
+      </Drawer>
 
-        <Dialog open={openAddLocationDialog} onClose={() => setOpenAddLocationDialog(false)}>
-          <DialogTitle>Add New Location</DialogTitle>
-          <DialogContent>
-            <TextField
-              label="Location Code"
+      {/* Sidebar for larger screens */}
+      {!isSmallScreen && (
+        <Grid item md={2} sm={2} xs={1} sx={{ flexShrink: 0 }}>
+          <SideBarComponent />
+        </Grid>
+      )}
+
+      {/* Main Content */}
+      <Grid item md={10} sm={9} xs={11} sx={{ width: '90%' }}>
+        <h1 className="text-2xl font-semibold m-2">Manage Locations</h1>
+
+        <Grid container spacing={2} sx={{ marginBottom: 2 }}>
+          <Grid item>
+            <Button
               variant="outlined"
-              fullWidth
-              value={locationCode}
-              onChange={(e) => setLocationCode(e.target.value)}
-              className="mb-4"
-            />
-            <TextField
-              label="Capacity"
-              variant="outlined"
-              fullWidth
-              type="number"
-              value={capacity}
-              onChange={(e) => setCapacity(e.target.value)}
-              className="mb-4"
-            />
-          </DialogContent>
-          <DialogActions>
-            <Button onClick={() => setOpenAddLocationDialog(false)} color="secondary">
-              Cancel
+              color="primary"
+              onClick={() => setOpenAddLocationDialog(true)}
+            >
+              Add New Location
             </Button>
-            <Button onClick={handleAddLocation} color="primary">
-              Add Location
+          </Grid>
+          <Grid item>
+            <Button
+              variant="contained"
+              color="primary"
+              onClick={handleUpdateStockWithGRN}
+            >
+              Update Stock from GRN
             </Button>
-          </DialogActions>
-        </Dialog>
+          </Grid>
+        </Grid>
+
+        {userRole === 'admin' ? (
+          <Dialog open={openAddLocationDialog} onClose={() => setOpenAddLocationDialog(false)}>
+            <DialogTitle>Add New Location</DialogTitle>
+            <DialogContent>
+              <TextField
+                label="Location Code"
+                variant="outlined"
+                fullWidth
+                value={locationCode}
+                onChange={(e) => setLocationCode(e.target.value)}
+                className="mb-4"
+              />
+              <TextField
+                label="Capacity"
+                variant="outlined"
+                fullWidth
+                type="number"
+                value={capacity}
+                onChange={(e) => setCapacity(e.target.value)}
+                className="mb-4"
+              />
+            </DialogContent>
+            <DialogActions>
+              <Button onClick={() => setOpenAddLocationDialog(false)} color="secondary">
+                Cancel
+              </Button>
+              <Button onClick={handleAddLocation} color="primary">
+                Add Location
+              </Button>
+            </DialogActions>
+          </Dialog>
+        ) : (
+          <Typography variant="h6" color="error" align="center" sx={{ mt: 2 }}>
+            You are a user and do not have permission to add locations.
+          </Typography>
+        )}
+
 
         {loading ? (
           <CircularProgress />
         ) : (
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+          <Grid container spacing={2}>
             {locations.map((location) => (
-              <Card key={location._id} className="shadow-lg">
-                <CardContent>
-                  <Typography variant="h6">{location.locationCode}</Typography>
-                  <Typography>Capacity: {location.capacity}</Typography>
-                  <Typography
-                    style={{
-                      fontWeight: location.stock > location.capacity ? 'bold' : 'normal',
-                      color: location.stock > location.capacity ? 'red' : 'black',
-                    }}
-                  >
-                    Stock: {location.stock}
-                  </Typography>
-                  <div className="mt-4">
-                    <Button
-                      variant="contained"
-                      color="primary"
-                      onClick={() => setSelectedLocation(location)}
+              <Grid item md={4} sm={6} xs={12} key={location._id} onClick={() => setSelectedLocation(location)}>
+                <Card className="shadow-lg">
+                  <CardContent>
+                    <Typography variant="h6">{location.locationCode}</Typography>
+                    <Typography>Capacity: {location.capacity}</Typography>
+                    <Typography
+                      style={{
+                        fontWeight: location.stock > location.capacity ? 'bold' : 'normal',
+                        color: location.stock > location.capacity ? 'red' : 'black',
+                      }}
                     >
-                      Manage Stock
-                    </Button>
-                  </div>
-                </CardContent>
-              </Card>
+                      Stock: {location.stock}
+                    </Typography>
+                  </CardContent>
+                </Card>
+              </Grid>
             ))}
-          </div>
+          </Grid>
         )}
 
-        {selectedLocation && (
+        {userRole === 'admin' && selectedLocation && (
           <Dialog open={true} onClose={() => setSelectedLocation(null)}>
             <DialogTitle>Manage Stock for {selectedLocation.locationCode}</DialogTitle>
             <DialogContent>
               <Typography variant="h6">Current Stock: {selectedLocation.stock}</Typography>
-              <div className="flex justify-between mt-4">
+              <Box sx={{ display: 'flex', justifyContent: 'space-between', marginTop: 2 }}>
                 <Button
                   variant="contained"
                   color="primary"
@@ -231,7 +282,7 @@ const LocationManager = ({ grnItems }) => {
                 >
                   Decrease Stock
                 </Button>
-              </div>
+              </Box>
             </DialogContent>
             <DialogActions>
               <Button onClick={() => setSelectedLocation(null)} color="secondary">
@@ -240,8 +291,9 @@ const LocationManager = ({ grnItems }) => {
             </DialogActions>
           </Dialog>
         )}
-      </div>
-    </div>
+
+      </Grid>
+    </Box>
   );
 };
 

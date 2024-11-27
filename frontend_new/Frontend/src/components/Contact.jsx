@@ -6,6 +6,7 @@ import LinkedInIcon from '@mui/icons-material/LinkedIn';
 import TwitterIcon from '@mui/icons-material/Twitter';
 import FacebookIcon from '@mui/icons-material/Facebook';
 import { useAuth } from '../AuthContext';
+import axios from 'axios';
 
 
 const ContactSection = () => {
@@ -42,23 +43,22 @@ const ContactSection = () => {
     const handleSubmit = async (e) => {
         e.preventDefault();
 
+        setFormStatus(null); 
         // Send the data to the backend API
         try {
-            const response = await fetch('/api/contact', {
-                method: 'POST',
+            const response = await axios.post(`${import.meta.env.VITE_API_URL}/api/contact`, formData,{
                 headers: {
                     'Content-Type': 'application/json',
                 },
-                body: JSON.stringify(formData),
             });
 
-            const result = await response.json();
+            // const result = await response.json();
 
-            if (response.ok) {
+            if (response.status === 200) {
                 setFormStatus({ type: 'success', message: 'Message sent successfully!' });
                 setFormData({ name: '', email: '', message: '', sendCopy: true }); // Reset form after submission
             } else {
-                setFormStatus({ type: 'error', message: result.message || 'Something went wrong!' });
+                setFormStatus({ type: 'error', message: result.data.message || 'Something went wrong!' });
             }
         } catch (error) {
             setFormStatus({ type: 'error', message: 'Error while sending the message!' });
@@ -84,7 +84,7 @@ const ContactSection = () => {
                 <div className="block rounded-lg bg-[hsla(0,0%,100%,0.8)] px-6 py-12 shadow-[0_2px_15px_-3px_rgba(0,0,0,0.07),0_10px_20px_-2px_rgba(0,0,0,0.04)] md:py-16 md:px-12 -mt-[100px] backdrop-blur-[30px] border border-gray-300">
                     <div className="flex flex-wrap">
                         <div className="mb-12 w-full shrink-0 grow-0 basis-auto md:px-3 lg:mb-0 lg:w-5/12 lg:px-6">
-                            <form>
+                            <form onSubmit={handleSubmit}>
                                 <div className="relative mb-6" data-te-input-wrapper-init>
                                     <input
                                         type="text"

@@ -1,275 +1,279 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect } from "react";
 import {
-  Typography,
-  TextField,
-  Button,
   Box,
-  Dialog,
-  DialogActions,
-  DialogContent,
-  DialogTitle,
+  Button,
   Snackbar,
   Alert,
-} from '@mui/material';
-import { DataGrid } from '@mui/x-data-grid';
-import axios from 'axios';
+  TextField,
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  DialogActions,
+  Select,
+  MenuItem,
+  InputLabel,
+  FormControl,
+} from "@mui/material";
+import { DataGrid } from "@mui/x-data-grid";
+import axios from "axios";
+import { toast } from "react-toastify"; // Assuming you use react-toastify for notifications
 
-export default function GrnItems() {
+export default function GrnItemsManager() {
   const [grnItems, setGrnItems] = useState([]);
-  const [locationList, setLocationList] = useState([]);
+  const [grnList, setGrnList] = useState([]);
+  const [locationList, setLocationList] = useState([]); // Store locations here
   const [newItem, setNewItem] = useState({
-    grnId: '', // You might need to select a GRN first
-    itemNo: '',
-    status: 'Pending', // Default status value
-    dockLocation: '',
+    itemNo: "",
+    description: "",
+    quantity: 0,
+    serialNumber: "",
+    invoiceNo: "",
+    dockCode: "",
+    receivingDate: "",
+    status: "Pending",
   });
-  const [selectedItems, setSelectedItems] = useState([]);
-  const [openItemModal, setOpenItemModal] = useState(false);
+  const [selectedGrnId, setSelectedGrnId] = useState("");
+  const [addItemModal, setAddItemModal] = useState(false);
   const [success, setSuccess] = useState(null);
   const [error, setError] = useState(null);
+  const [loading, setLoading] = useState(true);
 
   const columns = [
+    { field: "itemNo", headerName: "Item No", width: 150 },
+    { field: "quantity", headerName: "Quantity", width: 120 },
+    { field: "dockCode", headerName: "Location", width: 120 },
     {
-      field: 'checkbox',
-      headerName: 'Select',
-      width: 90,
-      renderCell: (params) => (
-        <input
-          type="checkbox"
-          checked={selectedItems.includes(params.row._id)}
-          onChange={(e) => handleCheckboxChange(e, params.row._id)}
-        />
-      ),
-    },
-    {
-      field: 'itemNo',
-      headerName: 'Item No',
-      width: 150,
-    },
-    {
-      field: 'status',
-      headerName: 'Status',
-      width: 150,
-      renderCell: (params) => (
-        <TextField
-          select
-          value={params.row.status}
-          onChange={(e) => handleStatusChange(e, params.row._id)}
-          fullWidth
-          SelectProps={{
-            native: true,
-          }}
-        >
-          <option value="Pending">Pending</option>
-          <option value="Received">Received</option>
-          <option value="Rejected">Rejected</option>
-        </TextField>
-      ),
-    },
-    {
-      field: 'dockLocation',
-      headerName: 'Dock Location',
+      field: "receivingNo",
+      headerName: "Receiving No",
       width: 200,
-      renderCell: (params) => (
-        <TextField
-          select
-          value={params.row.dockLocation}
-          onChange={(e) => handleLocationChange(e, params.row._id)}
-          fullWidth
-          SelectProps={{
-            native: true,
-          }}
-        >
-          <option value="">Select Location</option>
-          {locationList.map((location) => (
-            <option key={location._id} value={location._id}>
-              {location.locationCode}
-            </option>
-          ))}
-        </TextField>
-      ),
     },
+    {
+      field: "receivingDate",
+      headerName: "Receiving Date",
+      width: 200,
+    },
+    { field: "status", headerName: "Status", width: 120 },
   ];
 
-  const fetchGrnItems = async (grnId) => {
+  // Fetch GRN items and locations
+  const fetchGrnItems = async () => {
     try {
-      const response = await axios.get(`${import.meta.env.VITE_API_URL}/api/grn/${grnId}/item`);
-      setGrnItems(response.data);
-      console.log("this is respose of items",response.data);
-    } catch (err) {
-      setError('Error fetching GRN items');
-    }
-  };
-
-  const fetchLocations = async () => {
-    try {
-      const response = await axios.get(`${import.meta.env.VITE_API_URL}/api/locations`);
-      setLocationList(response.data);
-    } catch (err) {
-      setError('Error fetching locations');
-    }
-  };
-
-  const handleCheckboxChange = (e, id) => {
-    setSelectedItems((prevSelectedItems) =>
-      e.target.checked ? [...prevSelectedItems, id] : prevSelectedItems.filter((itemId) => itemId !== id)
-    );
-  };
-
-  const handleStatusChange = async (e, itemId) => {
-    const newStatus = e.target.value;
-    try {
-      await axios.patch(`${import.meta.env.VITE_API_URL}/api/grn/items/${itemId}/status`, { status: newStatus });
-      setGrnItems((prevItems) =>
-        prevItems.map((item) => (item._id === itemId ? { ...item, status: newStatus } : item))
+      const response = await axios.get(`${import.meta.env.VITE_API_URL}/api/grn`);
+      const allGrns = response.data.grns;
+      const items = allGrns.flatMap((grn) =>
+        grn.items.map((item) => ({
+          ...item,
+          grnId: grn._id,
+          receivingNo: grn.receivingNo,
+        }))
       );
-      setSuccess('Status updated successfully');
-      setError(null); // Clear any previous errors
+      setGrnItems(items);
+      setGrnList(allGrns);
     } catch (err) {
-      setError('Error updating status');
-      setSuccess(null); // Clear any previous success messages
+      console.error("Error fetching GRN items:", err);
+      setError("Failed to fetch GRN items.");
     }
   };
 
-  const handleLocationChange = async (e, itemId) => {
-    const newLocation = e.target.value;
-    try {
-      await axios.patch(`${import.meta.env.VITE_API_URL}/api/grn/items/${itemId}/location`, { dockLocation: newLocation });
-      setGrnItems((prevItems) =>
-        prevItems.map((item) => (item._id === itemId ? { ...item, dockLocation: newLocation } : item))
-      );
-      setSuccess('Location updated successfully');
-      setError(null);
-    } catch (err) {
-      setError('Error updating location');
-      setSuccess(null);
-    }
-  };
+  // Fetch locations using the approach from your `grn` component
+  useEffect(() => {
+    const fetchLocations = async () => {
+      try {
+        const response = await axios.get(`${import.meta.env.VITE_API_URL}/api/docklocations`);
+        setLocationList(response.data); // Update location list
+      } catch (err) {
+        console.error("Error fetching locations:", err);
+        toast.error("Error fetching locations."); // Show error notification
+      }
+    };
 
+    fetchLocations();
+  }, []);
+
+  // Add a new item to a GRN
   const addItemToGrn = async () => {
-    const { grnId, itemNo, status, dockLocation } = newItem;
-    if (!grnId || !itemNo || !status || !dockLocation) {
-      setError('Please fill in all fields');
+    if (!selectedGrnId || !newItem.itemNo || !newItem.description || !newItem.serialNumber || !newItem.invoiceNo || !newItem.dockCode || !newItem.quantity || !newItem.receivingDate) {
+      setError("Please fill out all fields.");
       return;
     }
 
     try {
-      const response = await axios.post(`${import.meta.env.VITE_API_URL}/api/grn/${grnId}/items`, newItem);
-      setGrnItems([...grnItems, response.data]);
-      setNewItem({ grnId: '', itemNo: '', status: 'Pending', dockLocation: '' });
-      setOpenItemModal(false);
-      setSuccess('Item added successfully');
-    } catch (err) {
-      setError('Error adding item to GRN');
-    }
-  };
-
-  const deleteSelectedItems = async () => {
-    try {
-      if (selectedItems.length === 0) {
-        setError('No items selected for deletion.');
+      const grn = grnList.find((grn) => grn._id === selectedGrnId);
+      if (!grn) {
+        setError("Selected GRN not found.");
         return;
       }
 
-      await axios.delete(`${import.meta.env.VITE_API_URL}/api/grn/items`, {
-        data: { itemIds: selectedItems },
-      });
+      const updatedItems = [...grn.items, newItem];
+      await axios.put(`${import.meta.env.VITE_API_URL}/api/grn/${selectedGrnId}`, { items: updatedItems });
 
-      setGrnItems((prevItems) => prevItems.filter((item) => !selectedItems.includes(item._id)));
-      setSelectedItems([]);
-      setSuccess('Items deleted successfully');
+      setSuccess("Item added successfully.");
+      setAddItemModal(false);
+      setNewItem({
+        itemNo: "",
+        description: "",
+        quantity: 0,
+        serialNumber: "",
+        invoiceNo: "",
+        dockCode: "",
+        receivingDate: "",
+        status: "Pending",
+      });
+      fetchGrnItems();
     } catch (err) {
-      setError('Error deleting selected items');
+      console.error("Error adding item to GRN:", err);
+      setError("Failed to add item.");
     }
   };
 
+  // Fetch data on component mount
   useEffect(() => {
-    fetchLocations();
+    fetchGrnItems();
   }, []);
 
   return (
     <Box>
-      <Box sx={{ display: 'flex', justifyContent: 'end', mb: 2 }}>
-        <Button variant="contained" color="primary" onClick={() => setOpenItemModal(true)} sx={{ mr: 2 }}>
-          Add New Item
-        </Button>
-        <Button
-          variant="contained"
-          color="secondary"
-          onClick={deleteSelectedItems}
-          disabled={selectedItems.length === 0}
-        >
-          Delete Selected Items
+      <Box sx={{ display: "flex", justifyContent: "space-between", mb: 2 }}>
+        <Button variant="contained" onClick={() => setAddItemModal(true)}>
+          Add Item to GRN
         </Button>
       </Box>
 
+      {/* DataGrid to show all GRN items */}
       <DataGrid
-        sx={{ borderLeft: 0, borderRight: 0, borderRadius: 0 }}
         rows={grnItems}
         columns={columns}
         pageSize={10}
-        getRowId={(row) => row._id}
+        getRowId={(row) => `${row.receivingNo}-${row.itemNo}`}
+        autoHeight
       />
 
-      {error && (
-        <Snackbar open={!!error} autoHideDuration={6000} onClose={() => setError(null)}>
-          <Alert severity="error">{error}</Alert>
-        </Snackbar>
-      )}
-
-      {success && (
-        <Snackbar open={!!success} autoHideDuration={6000} onClose={() => setSuccess(null)}>
-          <Alert severity="success">{success}</Alert>
-        </Snackbar>
-      )}
-
-      <Dialog open={openItemModal} onClose={() => setOpenItemModal(false)}>
-        <DialogTitle>Add New Item</DialogTitle>
+      {/* Modal to add new item */}
+      <Dialog open={addItemModal} onClose={() => setAddItemModal(false)}>
+        <DialogTitle>Add Item to GRN</DialogTitle>
         <DialogContent>
           <TextField
+            fullWidth
+            margin="dense"
             label="GRN ID"
-            value={newItem.grnId}
-            onChange={(e) => setNewItem({ ...newItem, grnId: e.target.value })}
-            fullWidth
-            sx={{ mb: 2 }}
-          />
-          <TextField
-            label="Item No"
-            value={newItem.itemNo}
-            onChange={(e) => setNewItem({ ...newItem, itemNo: e.target.value })}
-            fullWidth
-            sx={{ mb: 2 }}
-          />
-          <TextField
-            label="Status"
-            value={newItem.status}
-            onChange={(e) => setNewItem({ ...newItem, status: e.target.value })}
-            fullWidth
-            sx={{ mb: 2 }}
-          />
-          <TextField
             select
-            label="Dock Location"
-            value={newItem.dockLocation}
-            onChange={(e) => setNewItem({ ...newItem, dockLocation: e.target.value })}
-            fullWidth
+            value={selectedGrnId}
+            onChange={(e) => setSelectedGrnId(e.target.value)}
+            SelectProps={{ native: true }}
           >
-            {locationList.map((location) => (
-              <option key={location._id} value={location._id}>
-                {location.locationCode}
+            <option value="">Select a GRN</option>
+            {grnList.map((grn) => (
+              <option key={grn._id} value={grn._id}>
+                {grn.receivingNo}----{grn._id}
               </option>
             ))}
           </TextField>
+
+          <TextField
+            fullWidth
+            margin="dense"
+            label="Item No"
+            value={newItem.itemNo}
+            onChange={(e) => setNewItem({ ...newItem, itemNo: e.target.value })}
+          />
+
+          <TextField
+            fullWidth
+            margin="dense"
+            label="Description"
+            value={newItem.description}
+            onChange={(e) => setNewItem({ ...newItem, description: e.target.value })}
+          />
+
+          <TextField
+            fullWidth
+            margin="dense"
+            label="Serial Number"
+            value={newItem.serialNumber}
+            onChange={(e) => setNewItem({ ...newItem, serialNumber: e.target.value })}
+          />
+
+          <TextField
+            fullWidth
+            margin="dense"
+            label="Invoice No"
+            value={newItem.invoiceNo}
+            onChange={(e) => setNewItem({ ...newItem, invoiceNo: e.target.value })}
+          />
+
+          {/* Dock Location Dropdown */}
+          <FormControl fullWidth margin="dense">
+            <InputLabel>Location</InputLabel>
+            <Select
+              value={newItem.dockCode}
+              onChange={(e) => setNewItem({ ...newItem, dockCode: e.target.value })}
+              label="Location"
+            >
+              {locationList.length === 0 ? (
+                <MenuItem disabled>No locations available</MenuItem>
+              ) : (
+                locationList.map((location) => (
+                  <MenuItem key={location._id} value={location.dockCode}>
+                    {location.dockCode} - {location.description}
+                  </MenuItem>
+                ))
+              )}
+            </Select>
+          </FormControl>
+
+          <TextField
+            fullWidth
+            margin="dense"
+            label="Quantity"
+            type="number"
+            value={newItem.quantity}
+            onChange={(e) => setNewItem({ ...newItem, quantity: e.target.value })}
+          />
+
+          <TextField
+            fullWidth
+            margin="dense"
+            label="Receiving Date"
+            type="date"
+            value={newItem.receivingDate}
+            onChange={(e) => setNewItem({ ...newItem, receivingDate: e.target.value })}
+            InputLabelProps={{
+              shrink: true,
+            }}
+          />
+
+          <FormControl fullWidth margin="dense">
+            <InputLabel>Status</InputLabel>
+            <Select
+              value={newItem.status}
+              onChange={(e) => setNewItem({ ...newItem, status: e.target.value })}
+              label="Status"
+            >
+              <MenuItem value="Pending">Pending</MenuItem>
+              <MenuItem value="OK">OK</MenuItem>
+              <MenuItem value="Rejected">Rejected</MenuItem>
+            </Select>
+          </FormControl>
         </DialogContent>
         <DialogActions>
-          <Button onClick={() => setOpenItemModal(false)} color="secondary">
-            Cancel
-          </Button>
-          <Button onClick={addItemToGrn} color="primary">
+          <Button onClick={() => setAddItemModal(false)}>Cancel</Button>
+          <Button variant="contained" onClick={addItemToGrn}>
             Add Item
           </Button>
         </DialogActions>
       </Dialog>
+
+      {/* Success/Error Notifications */}
+      {success && (
+        <Snackbar open autoHideDuration={6000} onClose={() => setSuccess(null)}>
+          <Alert severity="success">{success}</Alert>
+        </Snackbar>
+      )}
+      {error && (
+        <Snackbar open autoHideDuration={6000} onClose={() => setError(null)}>
+          <Alert severity="error">{error}</Alert>
+        </Snackbar>
+      )}
     </Box>
   );
 }

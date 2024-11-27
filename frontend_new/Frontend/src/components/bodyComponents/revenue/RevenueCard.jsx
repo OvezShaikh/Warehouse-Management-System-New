@@ -25,15 +25,15 @@ export default function RevenueCard(props) {
             )}
           </Box>
         </Box>
-        <Box sx={{ display: "flex", justifyContent: "space-between" }}>
+        <Box sx={{ display: "flex", flexDirection: "row", justifyContent: "space-between", textWrap: "wrap", textAlign: "center"}}>
           <Box>
-            <Typography fontWeight={"light"} variant="h6">
+            <Typography fontWeight={"light"} variant="h6" textAlign={"left"}>
               {title}
             </Typography>
           </Box>
           <Box>
             {percentage && (
-              <Typography fontWeight={"light"} variant="caption" color={color}>
+              <Typography fontWeight={"light"} variant="caption" color={color} >
                 {subTitle}
               </Typography>
             )}

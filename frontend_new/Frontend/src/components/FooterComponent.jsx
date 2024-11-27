@@ -7,9 +7,9 @@ import images from "../constants/images";
 
 const Footer = ({ companyName = "Unostar Value Chain Pvt Ltd", links = [
   { href: '/', label: 'Home' },
-  { href: '/about-Us', label: 'About' },
+  { href: '/about-us', label: 'About' },
   { href: '/contact-us', label: 'Contact' },
-  { href: '/carrers', label: 'Carrers' },
+  { href: '/careers', label: 'Carrers' },
     ],
   socialLinks = [
     { href: 'https://www.linkedin.com/company/unostarvaluechain?originalSubdomain=in', label: 'LinkedIn', icon: <LinkedInIcon /> },
@@ -56,7 +56,7 @@ const Footer = ({ companyName = "Unostar Value Chain Pvt Ltd", links = [
       
       <Box sx={{ display: 'flex', gap: 4 }}>
         {socialLinks.map((social, index) => (
-          <Link key={index} href={social.href} aria-label={social.label}>
+          <Link key={index} href={social.href} aria-label={social.label} target="_blank">
             {React.isValidElement(social.icon) ? (
               React.cloneElement(social.icon, { style: { color: 'white', width: 26, height: 26 } }) // Customize icon styles
             ) : (

@@ -207,7 +207,7 @@
               try {
                 const response = await axios.get(`${import.meta.env.VITE_API_URL}/api/locations`);
                 setPutawayLocations(response.data.locations); // assuming response contains a locations array
-                set
+                // set
               } catch (error) {
                 console.error('Error fetching locations:', error);
               }

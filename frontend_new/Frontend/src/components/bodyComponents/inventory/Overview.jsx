@@ -1,71 +1,58 @@
-import {
-  Box,
-  Table,
-  TableBody,
-  TableCell,
-  TableContainer,
-  TableHead,
-  TableRow,
-  Typography,
-} from "@mui/material";
+import { Box, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Typography } from "@mui/material";
 import React from "react";
 
-export default function Overview() {
+export default function Overview({ grnData }) {
+  const totalProducts = grnData.reduce((sum, grn) => sum + grn.items.length, 0);
+  const totalQuantity = grnData.reduce(
+    (sum, grn) => sum + grn.items.reduce((s, item) => s + item.quantity, 0),
+    0
+  );
+  const pendingItems = grnData.reduce(
+    (sum, grn) => sum + grn.items.filter((item) => item.status === "Pending").length,
+    0
+  );
+  const totalGrns = grnData.length;
+
   return (
     <Box>
       <TableContainer>
         <Table>
+          <TableHead>
+            <TableRow>
+              <TableCell>Overview</TableCell>
+              <TableCell align="right">Value</TableCell>
+            </TableRow>
+          </TableHead>
           <TableBody>
             <TableRow>
-              <TableCell>Total Product</TableCell>
+              <TableCell>Total Items</TableCell>
               <TableCell align="right">
                 <Typography variant="subtitle1" fontWeight="bold">
-                  15226
+                  {totalProducts !== undefined ? totalProducts : "Calculating..."}
                 </Typography>
               </TableCell>
             </TableRow>
-
             <TableRow>
-              <TableCell>Today sell</TableCell>
+              <TableCell>Total Quantity</TableCell>
               <TableCell align="right">
                 <Typography variant="subtitle1" fontWeight="bold">
-                  5241
+                  {totalQuantity !== undefined ? totalQuantity : "Calculating..."}
                 </Typography>
               </TableCell>
             </TableRow>
-
             <TableRow>
-              <TableCell>Yesterday sell</TableCell>
+              <TableCell>Pending Items</TableCell>
               <TableCell align="right">
                 <Typography variant="subtitle1" fontWeight="bold">
-                  3652
+                  {pendingItems !== undefined ? pendingItems : "Calculating..."}
                 </Typography>
               </TableCell>
             </TableRow>
-
             <TableRow>
-              <TableCell>Total sell</TableCell>
+              <TableCell>Total GRNs</TableCell>
               <TableCell align="right">
                 <Typography variant="subtitle1" fontWeight="bold">
-                  11425
-                </Typography>
-              </TableCell>
-            </TableRow>
-
-            <TableRow>
-              <TableCell>Product Reserved</TableCell>
-              <TableCell align="right">
-                <Typography variant="subtitle1" fontWeight="bold">
-                  6547
-                </Typography>
-              </TableCell>
-            </TableRow>
-
-            <TableRow>
-              <TableCell>Stock Issues</TableCell>
-              <TableCell align="right">
-                <Typography variant="subtitle1" fontWeight="bold">
-                  9562
+                  {totalGrns !== undefined ? totalGrns : "Calculating..."}
                 </Typography>
               </TableCell>
             </TableRow>

@@ -13,7 +13,7 @@ import { useAuth } from '../AuthContext';
 
 const ProfilePage = () => {
   const navigate = useNavigate();
-  const { logout } = useAuth(); // Use AuthContext for authentication
+  const { logout, userRole } = useAuth(); // Use AuthContext for authentication
   const [user, setUser] = useState(null); // State to hold user data
   const [loading, setLoading] = useState(true); // State to manage loading status
   const [error, setError] = useState(null); // State to handle any errors
@@ -22,31 +22,32 @@ const ProfilePage = () => {
   useEffect(() => {
     const fetchProfile = async () => {
       const token = localStorage.getItem('token');
-      console.log("Got from profile fet",token);
       if (!token) {
         navigate('/login');
         return;
       }
+      setLoading(true);
 
       try {
-        const response = await fetch('/api/settings/profile', {
+        const response = await fetch(`${import.meta.env.VITE_API_URL}/api/settings/profile`, {
           method: 'GET',
           headers: {
+            'Authorization': `Bearer ${token}`, // Include token in request
             'Content-Type': 'application/json',
-            Authorization: `Bearer ${token}`, // Include token in request
           },
         });
 
         if (!response.ok) {
+          const errorText = await response.text();
           throw new Error('Failed to fetch profile data');
         }
 
         const data = await response.json();
         setUser(data); // Set user data from response
-        setLoading(false); // Stop loading
       } catch (err) {
-        setError(err.message);
-        setLoading(false);
+        setError(err.message); // Set error message if any
+      } finally {
+        setLoading(false); // Stop loading, regardless of success or failure
       }
     };
 
@@ -61,7 +62,7 @@ const ProfilePage = () => {
     }
 
     try {
-      await fetch('/api/auth/logout', {
+      await fetch(`${import.meta.env.VITE_API_URL}/api/auth/logout`, {
         method: 'POST',
         headers: {
           Authorization: `Bearer ${token}`,
@@ -92,12 +93,12 @@ const ProfilePage = () => {
   }
 
   return (
-    <Container maxWidth="md" sx={{ py: 5 }}>
+    <Container maxWidth="md" height="full" sx={{ py: 5 }}>
       <Paper elevation={3} sx={{ padding: 3 }}>
         <Grid container spacing={4}>
           <Grid item xs={12} sm={4} sx={{ display: 'flex', justifyContent: 'center' }}>
             <Avatar
-              src={user.profilePicture ? `${process.env.VITE_API_URL}/uploads/${user.profilePicture}` : 'https://via.placeholder.com/150'}
+              src={user.profilePicture ? `${import.meta.env.VITE_API_URL}/${user.profilePicture.replace('\\', '/')}` : 'https://via.placeholder.com/150'}
               alt={user.username}
               sx={{ width: 150, height: 150 }}
             />
@@ -109,11 +110,11 @@ const ProfilePage = () => {
             <Typography variant="body1" color="textSecondary" gutterBottom>
               {user.email || 'No email available'}
             </Typography>
-            <Typography variant="body2" gutterBottom>
-              {user.bio || 'No bio available'}
+            <Typography variant="bold" gutterBottom>
+            {userRole ? userRole.charAt(0).toUpperCase() + userRole.slice(1).toLowerCase() : 'No role available'}
             </Typography>
             <Box sx={{ display: 'flex', gap: 2, mt: 3 }}>
-              <Button variant="contained" color="primary" onClick={() => navigate('/edit-profile')}>
+              <Button variant="contained" color="primary" onClick={() => navigate('/settings')}>
                 Edit Profile
               </Button>
               <Button variant="outlined" color="secondary" onClick={handleLogout}>

@@ -45,7 +45,8 @@ export default function NavBarComponent() {
   };
 
   const handleServicesClicked = (event) => {
-    setServicesAnchorEl(event.currentTarget); // Open services dropdown
+    navigate('/about-us');
+    // setServicesAnchorEl(event.currentTarget); // Open services dropdown
   };
 
   const handleDashboardClicked = () => {
@@ -124,75 +125,10 @@ export default function NavBarComponent() {
                 >
                   {isLoggedIn ? (
                     <>
-                      <IconButton color="inherit" onClick={handleNotificationClicked}>
-                        <Badge variant="dot" color="error" invisible={false}>
-                          <NotificationsOutlined
-                            sx={{ width: { xs: 20, md: 32 }, height: { xs: 20, md: 32 } }}
-                          />
-                        </Badge>
-                      </IconButton>
+                    
 
                       {/* Notification Dropdown Menu */}
-                      <Menu
-                        open={notificationOpen}
-                        anchorEl={notificationAnchorEl}
-                        onClose={notificationHandleClose}
-                        PaperProps={{
-                          sx: {
-                            backgroundColor: '#f0f4ff', // Light blue background
-                            boxShadow: '0px 4px 10px rgba(0, 0, 0, 0.1)', // Subtle shadow
-                            borderRadius: '8px',
-                          },
-                        }}
-                        MenuListProps={{
-                          sx: { padding: 0 },
-                        }}
-                      >
-                        <MenuItem
-                          onClick={() => {
-                            notificationHandleClose();
-                            // navigate("/notification-1");
-                          }}
-                          sx={{
-                            color: '#0a2e5c',
-                            padding: '12px 24px',
-                            '&:hover': { backgroundColor: '#d9e4ff' },
-                            '&:focus': { backgroundColor: '#a3c4ff', color: '#fff' },
-                          }}
-                        >
-                          Notification number 1
-                        </MenuItem>
-                        <Divider />
-                        <MenuItem
-                          onClick={() => {
-                            notificationHandleClose();
-                            // navigate("/notification-2");
-                          }}
-                          sx={{
-                            color: '#0a2e5c',
-                            padding: '12px 24px',
-                            '&:hover': { backgroundColor: '#d9e4ff' },
-                            '&:focus': { backgroundColor: '#a3c4ff', color: '#fff' },
-                          }}
-                        >
-                          Notification number 2
-                        </MenuItem>
-                        <Divider />
-                        <MenuItem
-                          onClick={() => {
-                            notificationHandleClose();
-                            // navigate("/notification-3");
-                          }}
-                          sx={{
-                            color: '#0a2e5c',
-                            padding: '12px 24px',
-                            '&:hover': { backgroundColor: '#d9e4ff' },
-                            '&:focus': { backgroundColor: '#a3c4ff', color: '#fff' },
-                          }}
-                        >
-                          Notification number 3
-                        </MenuItem>
-                      </Menu>
+                    
 
                       <Button
                         onClick={handleDashboardClicked}
@@ -217,7 +153,7 @@ export default function NavBarComponent() {
                         Services
                       </Button>
 
-                      <Menu
+                      {/* <Menu
                         open={servicesOpen}
                         anchorEl={servicesAnchorEl}
                         onClose={servicesHandleClose}
@@ -351,7 +287,7 @@ export default function NavBarComponent() {
                         >
                           PEOPLE MANAGEMENT(EXECUTIVE)
                         </MenuItem>
-                      </Menu>
+                      </Menu> */}
 
                       <IconButton onClick={handleAvatarClicked} size="small" aria-haspopup="true">
                         <Tooltip title="account settings">

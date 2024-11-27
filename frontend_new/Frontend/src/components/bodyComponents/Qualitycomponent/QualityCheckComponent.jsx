@@ -55,17 +55,56 @@ const QualityCheckComponent = () => {
     setSnackbarOpen(false);
   };
 
+  // const handleItemStatusChange = async (grnId, itemId, newStatus) => {
+  //   setLoadingGrnId(grnId);
+  
+  //   try {
+  //     // Update the item status
+  //     const response = await axios.patch(
+  //       `${import.meta.env.VITE_API_URL}/api/grn/${grnId}/item/${itemId}/status`,
+  //       { status: newStatus }
+  //     );
+  
+  //     if (response.status === 200) {
+  //       setGrnData((prevGrns) =>
+  //         prevGrns.map((grn) =>
+  //           grn._id === grnId
+  //             ? {
+  //                 ...grn,
+  //                 items: grn.items.map((item) =>
+  //                   item._id === itemId ? { ...item, status: newStatus } : item
+  //                 ),
+  //               }
+  //             : grn
+  //         )
+  //       );
+  //       setSnackbarMessage("Item status updated successfully!");
+  //     } else {
+  //       throw new Error("Failed to update item status");
+  //     }
+  //   } catch (error) {
+  //     console.error("Error updating item status:", error);
+  //     setSnackbarMessage("Failed to update item status.");
+  //   } finally {
+  //     setSnackbarOpen(true);
+  //     setLoadingGrnId(null);
+  //   }
+  // };
+
+  // Handle changing the dock location for a specific item
+  
   const handleItemStatusChange = async (grnId, itemId, newStatus) => {
     setLoadingGrnId(grnId);
   
     try {
-      // Update the item status
+      // Update the item's status
       const response = await axios.patch(
         `${import.meta.env.VITE_API_URL}/api/grn/${grnId}/item/${itemId}/status`,
         { status: newStatus }
       );
   
       if (response.status === 200) {
+        // Update the local state for the item's status
         setGrnData((prevGrns) =>
           prevGrns.map((grn) =>
             grn._id === grnId
@@ -78,56 +117,82 @@ const QualityCheckComponent = () => {
               : grn
           )
         );
-        setSnackbarMessage("Item status updated successfully!");
+  
+        // Evaluate GRN status based on the updated item statuses
+        const updatedGrn = grnData.find((grn) => grn._id === grnId);
+        const allOk = updatedGrn.items.every((item) =>
+          item._id === itemId ? newStatus === "OK" : item.status === "OK"
+        );
+        const anyRejected = updatedGrn.items.some((item) =>
+          item._id === itemId ? newStatus === "Rejected" : item.status === "Rejected"
+        );
+  
+        let grnStatus = "Pending";
+        if (anyRejected) {
+          grnStatus = "Rejected";
+        } else if (allOk) {
+          grnStatus = "OK";
+        }
+  
+        // Update the GRN status using your existing API
+        const grnStatusResponse = await axios.patch(
+          `${import.meta.env.VITE_API_URL}/api/grn/${grnId}/status`,
+          { status: grnStatus }
+        );
+  
+        if (grnStatusResponse.status === 200) {
+          setSnackbarMessage("Item and GRN status updated successfully!");
+        } else {
+          throw new Error("Failed to update GRN status");
+        }
       } else {
         throw new Error("Failed to update item status");
       }
     } catch (error) {
-      console.error("Error updating item status:", error);
-      setSnackbarMessage("Failed to update item status.");
+      console.error("Error updating item or GRN status:", error);
+      setSnackbarMessage("Failed to update item or GRN status.");
     } finally {
       setSnackbarOpen(true);
       setLoadingGrnId(null);
     }
   };
-
-  // Handle changing the dock location for a specific item
-  const handleLocationChange = async (grnId, itemId, newLocation, newStatus) => {
-    setLoadingGrnId(grnId);
   
-    try {
-      const response = await axios.patch(
-        `${import.meta.env.VITE_API_URL}/api/grn/${grnId}/item/${itemId}/location`,
-        { dockLocation: newLocation, status: newStatus }
-      );
+  // const handleLocationChange = async (grnId, itemId, newLocation, newStatus) => {
+  //   setLoadingGrnId(grnId);
   
-      if (response.status === 200) {
-        setGrnData((prevGrns) =>
-          prevGrns.map((grn) =>
-            grn._id === grnId
-              ? {
-                  ...grn,
-                  items: grn.items.map((item) =>
-                    item._id === itemId
-                      ? { ...item, dockLocation: newLocation, status: newStatus }
-                      : item
-                  ),
-                }
-              : grn
-          )
-        );
-        setSnackbarMessage("Dock location and status updated successfully!");
-      } else {
-        throw new Error("Failed to update dock location and status");
-      }
-    } catch (error) {
-      console.error("Error updating dock location and status:", error);
-      setSnackbarMessage("Failed to update location and status.");
-    } finally {
-      setSnackbarOpen(true);
-      setLoadingGrnId(null);
-    }
-  };
+  //   try {
+  //     const response = await axios.patch(
+  //       `${import.meta.env.VITE_API_URL}/api/grn/${grnId}/item/${itemId}/location`,
+  //       { dockLocation: newLocation, status: newStatus }
+  //     );
+  
+  //     if (response.status === 200) {
+  //       setGrnData((prevGrns) =>
+  //         prevGrns.map((grn) =>
+  //           grn._id === grnId
+  //             ? {
+  //                 ...grn,
+  //                 items: grn.items.map((item) =>
+  //                   item._id === itemId
+  //                     ? { ...item, dockLocation: newLocation, status: newStatus }
+  //                     : item
+  //                 ),
+  //               }
+  //             : grn
+  //         )
+  //       );
+  //       setSnackbarMessage("Dock location and status updated successfully!");
+  //     } else {
+  //       throw new Error("Failed to update dock location and status");
+  //     }
+  //   } catch (error) {
+  //     console.error("Error updating dock location and status:", error);
+  //     setSnackbarMessage("Failed to update location and status.");
+  //   } finally {
+  //     setSnackbarOpen(true);
+  //     setLoadingGrnId(null);
+  //   }
+  // };
 
   return (
     <Box sx={{ padding: 4 }}>

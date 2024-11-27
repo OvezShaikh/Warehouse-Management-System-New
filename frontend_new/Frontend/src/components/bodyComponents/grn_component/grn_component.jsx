@@ -7,6 +7,7 @@ import ExcelJS from 'exceljs';
 // import { QrReader } from 'react-qr-reader';
 import QrScanner from 'react-qr-scanner';
 import { format } from 'date-fns';
+import { useAuth } from "../../../AuthContext";
 
 const GRNComponent = () => {
   const [file, setFile] = useState(null);
@@ -25,6 +26,7 @@ const GRNComponent = () => {
   const [liveLocations, setLiveLocations] = useState([]);
   const [loadingGrnId, setLoadingGrnId] = useState(null);
   const today = format(new Date(), 'yyyy-MM-dd');
+  const {userRole} = useAuth();
 
 
 
@@ -197,11 +199,6 @@ const GRNComponent = () => {
 
     // Set the docklocation for the item
     item.docklocation = location.dockCode;
-
-    // Optionally, update other fields like capacity or current load if needed
-    // For example, if the location has capacity, you can update it here.
-    // item.capacity = location.capacity;
-    // item.currentLoad = location.currentLoad + item.quantity;
 
     // Update the state with the modified GRN data
     setGrnData(updatedGrnData);
@@ -427,6 +424,12 @@ const GRNComponent = () => {
   // const filteredGrns = createdGrns.filter(grn => grn.poNumber.includes(searchPoNumber));
 
   const handleDeleteGRN = async (grnId) => {
+
+    if (userRole !== 'admin') {
+      toast.error("You do not have permission to delete GRNs.");
+      return;
+    }
+
     if (!window.confirm("Are you sure you want to delete this GRN?")) return;
     try {
       // Fetch the GRN to get the list of items
@@ -461,6 +464,12 @@ const GRNComponent = () => {
   
 
   const handleDeleteItem = async (grnId, itemNo) => {
+    
+
+    if (userRole !== 'admin') {
+      toast.error("You do not have permission to delete items.");
+      return;
+    }
     try {
       // Send request to backend to delete the individual item
       await axios.delete(`${import.meta.env.VITE_API_URL}/api/grn/${grnId}/item/${itemNo}`);
@@ -499,7 +508,6 @@ const GRNComponent = () => {
 
 
   useEffect(() => {
-    // When a toast is triggered, the ToastContainer should show.
     if (toastVisible) {
       setToastVisible(true);
     } else {
@@ -613,6 +621,7 @@ const GRNComponent = () => {
               <TableCell align="center"><strong>Serial Number</strong></TableCell>
               <TableCell align="center"><strong>Receiving Date</strong></TableCell>
               <TableCell align="center"><strong>Location</strong></TableCell>
+
             </TableRow>
           </TableHead>
           <TableBody>
@@ -677,11 +686,11 @@ const GRNComponent = () => {
               <TableCell align="center"><strong>Supplier</strong></TableCell>
               <TableCell align="center"><strong>Serial Number</strong></TableCell>
               <TableCell align="center"><strong>Invoice No.</strong></TableCell>
-              <TableCell align="center"><strong>DockLocation/PutawayLocation</strong></TableCell>
+              <TableCell align="center"><strong>DockLocation/ PutawayLocation</strong></TableCell>
               <TableCell align="center"><strong>Set PutawayLocation</strong></TableCell>
-              <TableCell align="center"><strong>Status</strong></TableCell>
-              <TableCell align="center"><strong></strong></TableCell>
-              <TableCell align="right" className="w-full text-nowrap"><strong>Actions and Putaway</strong></TableCell>
+              <TableCell align="center"><strong>Actions</strong></TableCell>
+              <TableCell align="center"><strong>Status </strong></TableCell>
+              <TableCell align="left" className="w-full text-nowrap"><strong>Actions and Putaway</strong></TableCell>
             </TableRow>
           </TableHead>
           <TableBody>
@@ -817,20 +826,10 @@ const GRNComponent = () => {
                             ))}
                           </Select>
                         </TableCell>
-                        <TableCell align="center">
-                          {/* {
-                            // Check if the dockLocation exists
-                            item.dockLocation
-                              ? // If dockLocation exists, find the corresponding location details from liveLocations
-                              liveLocations.find((location) => location.locationCode === item.dockLocation)?.locationName || 'No Location'
-                              : // If no dockLocation, fall back to dockCode or display 'No Location'
-                              item.dockCode || 'No Location'
-                          } */}
-                        </TableCell>
 
                         {/* Table Cell showing Status */}
                         {/* <TableCell align="center">{item.status}</TableCell> */}
-                        <TableCell align="right" colSpan={8} sx={{ fontStyle: 'italic' }}>
+                        <TableCell align="left" sx={{ fontStyle: 'italic' }}>
                           <Box
                             sx={{
                               ...getStatusColor(item.status),
@@ -844,7 +843,7 @@ const GRNComponent = () => {
                         </TableCell>
 
                         {/* Actions */}
-                        <TableCell align="center">
+                        <TableCell align="left">
                           <Button
                             variant="outlined"
                             color="error"
@@ -861,9 +860,6 @@ const GRNComponent = () => {
           </TableBody>
         </Table>
       </TableContainer>
-
-
-
     </Box>
   );
 };

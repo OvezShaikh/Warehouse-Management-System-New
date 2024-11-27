@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState, useEffect } from "react";
 import {
   Box,
   Table,
@@ -9,19 +9,62 @@ import {
   TableRow,
   Typography,
 } from "@mui/material";
+import axios from "axios";
+
 export default function TopSellingProduct() {
-  const products = [
-    { name: "ASOS Ridey", price: 25.05, quantity: 73, amount: 1.828 },
-    {
-      name: "Philip Morris International",
-      price: 85.05,
-      quantity: 84,
-      amount: 7.144,
-    },
-    { name: "Donna Karan", price: 96.05, quantity: 94, amount: 9.028 },
-    { name: "Marco Pollo", price: 31.09, quantity: 51, amount: 1.585 },
-    { name: "Dolce Gabbana", price: 27.09, quantity: 78, amount: 2.113 },
-  ];
+  const [products, setProducts] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState("");
+
+  useEffect(() => {
+    const fetchProducts = async () => {
+      try {
+        const response = await axios.get("http://localhost:5000/api/grn");
+        const grns = response.data.grns;
+
+        // Flattening the 'items' array to extract product details and sorting by quantity
+        const formattedProducts = grns
+          .flatMap((grn) =>
+            grn.items.map((item) => ({
+              name: item.description,
+              quantity: item.quantity,
+              supplier: item.supplier,
+            }))
+          )
+          .sort((a, b) => b.quantity - a.quantity); // Sorting by quantity in descending order
+
+        // Limiting to the top 10 products
+        const top10Products = formattedProducts.slice(0, 5);
+
+        setProducts(top10Products);
+      } catch (err) {
+        setError("Failed to fetch products.");
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchProducts();
+  }, []);
+
+  if (loading) {
+    return (
+      <Box sx={{ margin: 3, bgcolor: "white", borderRadius: 2, padding: 3 }}>
+        <Typography variant="h6">Loading...</Typography>
+      </Box>
+    );
+  }
+
+  if (error) {
+    return (
+      <Box sx={{ margin: 3, bgcolor: "white", borderRadius: 2, padding: 3 }}>
+        <Typography variant="h6" color="error">
+          {error}
+        </Typography>
+      </Box>
+    );
+  }
+
   return (
     <Box
       sx={{
@@ -30,35 +73,39 @@ export default function TopSellingProduct() {
         borderRadius: 2,
         padding: 3,
         height: "95%",
+        overflow: "auto",
       }}
     >
       <Typography variant="h6" fontWeight={"bold"} sx={{ mx: 3 }}>
-        Top selling products
+        Top Stored Items
       </Typography>
-      <TableContainer>
-        <Table>
-          <TableHead>
-            <TableRow>
-              <TableCell sx={{ fontWeight: "bolder" }}>Name</TableCell>
-              <TableCell sx={{ fontWeight: "bolder" }}>Price</TableCell>
-              <TableCell sx={{ fontWeight: "bolder" }}>Quantity</TableCell>
-              <TableCell sx={{ fontWeight: "bolder" }}>Amount</TableCell>
-            </TableRow>
-          </TableHead>
-          <TableBody>
-            {products.map((product, id) => {
-              return (
+      {products.length > 0 ? (
+        <TableContainer>
+          <Table>
+            <TableHead>
+              <TableRow>
+                <TableCell sx={{ fontWeight: "bolder" }}>Name</TableCell>
+                <TableCell sx={{ fontWeight: "bolder" }}>Quantity</TableCell>
+              </TableRow>
+            </TableHead>
+            <TableBody>
+              {products.map((product, id) => (
                 <TableRow key={id}>
                   <TableCell>{product.name}</TableCell>
-                  <TableCell>{product.price}</TableCell>
                   <TableCell>{product.quantity}</TableCell>
-                  <TableCell>{product.amount}</TableCell>
                 </TableRow>
-              );
-            })}
-          </TableBody>
-        </Table>
-      </TableContainer>
+              ))}
+            </TableBody>
+          </Table>
+        </TableContainer>
+      ) : (
+        <Typography
+          variant="h6"
+          sx={{ textAlign: "center", color: "gray", marginTop: "50px" }}
+        >
+          No Data Available
+        </Typography>
+      )}
     </Box>
   );
 }
