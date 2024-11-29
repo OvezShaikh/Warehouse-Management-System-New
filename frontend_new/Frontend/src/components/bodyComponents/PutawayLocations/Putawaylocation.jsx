@@ -80,6 +80,42 @@ const LocationManager = ({ grnItems }) => {
     }
   };
 
+
+  const handleUpdateCapacity = async (increment) => {
+    if (!selectedLocation) return;
+
+    const updatedCapacity = increment
+      ? selectedLocation.capacity + 1
+      : selectedLocation.capacity - 1;
+
+    if (updatedCapacity < 0) {
+      toast.error("Capacity cannot be less than zero!");
+      return;
+    }
+
+    // Optimistic update
+    setSelectedLocation((prev) => ({ ...prev, capacity: updatedCapacity }));
+    setLocations((prevLocations) =>
+      prevLocations.map((loc) =>
+        loc._id === selectedLocation._id ? { ...loc, capacity: updatedCapacity } : loc
+      )
+    );
+
+    try {
+      await axios.patch(
+        `${import.meta.env.VITE_API_URL}/api/locations/${selectedLocation._id}/capacity`,
+        { capacity: updatedCapacity }
+      );
+      toast.success("Capacity updated successfully!", { autoClose: 2000 });
+    } catch (error) {
+      console.error("Error updating capacity:", error);
+      toast.error("Failed to update capacity.");
+      fetchLocations(); // Revert optimistic update
+    }
+  };
+
+
+
   // Update stock for the selected location manually
   const handleUpdateStock = async (increment) => {
     console.log('Selected Location ID:', selectedLocation._id);
@@ -282,7 +318,33 @@ const LocationManager = ({ grnItems }) => {
                 >
                   Decrease Stock
                 </Button>
+
+                  
               </Box>
+              <Typography variant="h6">Current Capacity: {selectedLocation.capacity}</Typography>
+
+              <Box sx={{ display: 'flex', justifyContent: 'space-between', margin: 2 }}>
+                
+                <Button
+                sx={{p:1.5 , margin: 2}}
+                  variant="contained"
+                  color="primary"
+                  onClick={() => handleUpdateCapacity(true)}
+                >
+                  Increase Capacity
+                </Button>
+                <Button
+                sx={{p:1.5, margin: 2}}
+                  variant="contained"
+                  color="secondary"
+                  onClick={() => handleUpdateCapacity(false)}
+                >
+                  Decrease Capacity
+                </Button>
+                </Box>
+              {/* Buttons for capacity management */}
+              {/*  */}
+
             </DialogContent>
             <DialogActions>
               <Button onClick={() => setSelectedLocation(null)} color="secondary">

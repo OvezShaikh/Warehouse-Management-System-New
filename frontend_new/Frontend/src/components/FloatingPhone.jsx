@@ -27,7 +27,7 @@ const FloatingPhone = () => {
       <motion.div
         initial={{ transform: "translateZ(8px) translateY(-2px)" }}
         animate={{ transform: "translateZ(32px) translateY(-8px)" }}
-        transition={{ repeat: Infinity, repeatType: "mirror", duration: 2, ease: "easeInOut" }}
+        transition={{ repeat: Infinity, repeatType: "mirror", duration: 1.5, ease: "easeInOut" }}
         style={{
           height: "24rem",
           width: "14rem",

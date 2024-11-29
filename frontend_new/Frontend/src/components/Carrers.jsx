@@ -11,6 +11,7 @@ import {
 } from '@mui/material';
 import axios from 'axios';
 import {useAuth} from "../AuthContext";
+import Footer from './FooterComponent';
 
 const Careers = () => {
   const {userRole} = useAuth();
@@ -72,15 +73,16 @@ const Careers = () => {
   };
 
   return (
-    <div className="bg-gray-100 font-sans">
-      <header className="bg-blue-400 text-white py-6">
-        <div className="container mx-auto text-center">
-          <h1 className="text-4xl font-bold">Join Our Team</h1>
-          <p className="mt-2 text-lg">Explore exciting opportunities to grow with us.</p>
-        </div>
-      </header>
+    <div className="min-h-screen flex flex-col bg-gray-100 font-sans">
+  <header className="bg-blue-400 text-white py-6">
+    <div className="container mx-auto text-center">
+      <h1 className="text-4xl font-bold">Join Our Team</h1>
+      <p className="mt-2 text-lg">Explore exciting opportunities to grow with us.</p>
+    </div>
+  </header>
 
-      <Box sx={{ my: 4, mx: 2 }}>
+  <main className="flex-grow">
+    <Box sx={{ my: 4, mx: 2 }}>
       {userRole === 'admin' && (
         <Box sx={{ mb: 6, p: 3, bgcolor: 'white', borderRadius: 2 }}>
           <Typography variant="h5" fontWeight="bold" mb={2}>
@@ -116,26 +118,30 @@ const Careers = () => {
             </Button>
           </form>
         </Box>
-        )}
+      )}
 
-        <section>
-          <Typography variant="h5" fontWeight="bold" textAlign="center" mb={4}>
-            Current Openings
-          </Typography>
-          {loading ? (
-            <Typography textAlign="center">Loading...</Typography>
-          ) : (
-            <Grid container spacing={4}>
-              {jobOpenings.map((job) => (
-                <Grid item xs={12} sm={6} md={4} key={job._id}>
-                  <JobListing job={job} onDeleteJob={handleDeleteJob}/>
-                </Grid>
-              ))}
-            </Grid>
-          )}
-        </section>
-      </Box>
-    </div>
+      <section>
+        <Typography variant="h5" fontWeight="bold" textAlign="center" mb={4}>
+          Current Openings
+        </Typography>
+        {loading ? (
+          <Typography textAlign="center">Loading...</Typography>
+        ) : (
+          <Grid container spacing={4}>
+            {jobOpenings.map((job) => (
+              <Grid item xs={12} sm={6} md={4} key={job._id}>
+                <JobListing job={job} onDeleteJob={handleDeleteJob} />
+              </Grid>
+            ))}
+          </Grid>
+        )}
+      </section>
+    </Box>
+  </main>
+
+  <Footer />
+</div>
+
   );
 };
 

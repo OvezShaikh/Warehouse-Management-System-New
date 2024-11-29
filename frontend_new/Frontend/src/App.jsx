@@ -13,7 +13,7 @@ import {
   RouterProvider,
   Navigate,
 } from "react-router-dom";
-import { AuthProvider } from './AuthContext';
+import { AuthProvider } from "./AuthContext";
 import Home from "./components/bodyComponents/Home/Home";
 import Inventory from "./components/bodyComponents/inventory/Inventory";
 import Customer from "./components/bodyComponents/customer/Customer";
@@ -35,13 +35,22 @@ import SettingsPage from "./components/bodyComponents/Settings/Setting";
 import InplantLogistics from "./components/bodyComponents/staticpages/InplantLogistics";
 
 // ProtectedRoute Component
-const ProtectedRoute = ({ isAuthenticated, children }) => {
-  return isAuthenticated ? children : <Navigate to="/login" replace />;
+const ProtectedRoute = ({ token, userRole, allowedRoles, children }) => {
+  if (!token && !userRole) {
+    return <Navigate to="/login" replace />;
+  }
+
+  if (allowedRoles && userRole && !allowedRoles.includes(userRole)) {
+    return <Navigate to="/home" replace />;
+  }
+
+  return children;
 };
 
 function App() {
   const [grnData, setGrnData] = useState([]);
-  const isAuthenticated = !!localStorage.getItem("token"); // Example: check if the user is logged in
+  const token = localStorage.getItem("token");
+  const userRole = localStorage.getItem("userRole");
 
   useEffect(() => {
     const fetchGrnData = async () => {
@@ -49,7 +58,7 @@ function App() {
         const response = await fetch(`${import.meta.env.VITE_API_URL}/api/grn`);
         const result = await response.json();
         console.log("Fetched GRN Data:", result);
-        setGrnData(result.grns); // Pass the 'grns' array to your component
+        setGrnData(result.grns);
       } catch (error) {
         console.error("Error fetching GRN data:", error);
       }
@@ -98,7 +107,7 @@ function App() {
         <Route
           path="/home"
           element={
-            <ProtectedRoute isAuthenticated={isAuthenticated}>
+            <ProtectedRoute token={token} userRole={userRole} allowedRoles={["user", "admin"]}>
               <Home />
             </ProtectedRoute>
           }
@@ -106,7 +115,7 @@ function App() {
         <Route
           path="/grn"
           element={
-            <ProtectedRoute isAuthenticated={isAuthenticated}>
+            <ProtectedRoute token={token} userRole={userRole} allowedRoles={["admin"]}>
               <GRNComponent grnData={grnData} setGrnData={setGrnData} />
             </ProtectedRoute>
           }
@@ -114,7 +123,7 @@ function App() {
         <Route
           path="/qualitycheck"
           element={
-            <ProtectedRoute isAuthenticated={isAuthenticated}>
+            <ProtectedRoute token={token} userRole={userRole} allowedRoles={["admin"]}>
               <QualityCheck grnData={grnData} setGrnData={setGrnData} />
             </ProtectedRoute>
           }
@@ -122,7 +131,7 @@ function App() {
         <Route
           path="/inventory"
           element={
-            <ProtectedRoute isAuthenticated={isAuthenticated}>
+            <ProtectedRoute token={token} userRole={userRole} allowedRoles={["admin"]}>
               <Inventory />
             </ProtectedRoute>
           }
@@ -130,7 +139,7 @@ function App() {
         <Route
           path="/customers"
           element={
-            <ProtectedRoute isAuthenticated={isAuthenticated}>
+            <ProtectedRoute token={token} userRole={userRole} allowedRoles={["user", "admin"]}>
               <Customer />
             </ProtectedRoute>
           }
@@ -138,7 +147,7 @@ function App() {
         <Route
           path="/revenue"
           element={
-            <ProtectedRoute isAuthenticated={isAuthenticated}>
+            <ProtectedRoute token={token} userRole={userRole} allowedRoles={["admin"]}>
               <Revenue />
             </ProtectedRoute>
           }
@@ -146,7 +155,7 @@ function App() {
         <Route
           path="/growth"
           element={
-            <ProtectedRoute isAuthenticated={isAuthenticated}>
+            <ProtectedRoute token={token} userRole={userRole} allowedRoles={["admin"]}>
               <Growth />
             </ProtectedRoute>
           }
@@ -154,7 +163,7 @@ function App() {
         <Route
           path="/reports"
           element={
-            <ProtectedRoute isAuthenticated={isAuthenticated}>
+            <ProtectedRoute token={token} userRole={userRole} allowedRoles={["admin"]}>
               <Report />
             </ProtectedRoute>
           }
@@ -162,7 +171,7 @@ function App() {
         <Route
           path="/settings"
           element={
-            <ProtectedRoute isAuthenticated={isAuthenticated}>
+            <ProtectedRoute token={token} userRole={userRole} allowedRoles={["user", "admin"]}>
               <SettingsPage />
             </ProtectedRoute>
           }
@@ -170,7 +179,7 @@ function App() {
         <Route
           path="/profile"
           element={
-            <ProtectedRoute isAuthenticated={isAuthenticated}>
+            <ProtectedRoute token={token} userRole={userRole} allowedRoles={["user", "admin"]}>
               <ProfilePage />
             </ProtectedRoute>
           }
@@ -178,7 +187,7 @@ function App() {
         <Route
           path="/dock-locations"
           element={
-            <ProtectedRoute isAuthenticated={isAuthenticated}>
+            <ProtectedRoute token={token} userRole={userRole} allowedRoles={["admin"]}>
               <AddDockLocation />
             </ProtectedRoute>
           }
@@ -186,7 +195,7 @@ function App() {
         <Route
           path="/grnreport"
           element={
-            <ProtectedRoute isAuthenticated={isAuthenticated}>
+            <ProtectedRoute token={token} userRole={userRole} allowedRoles={["admin"]}>
               <GRNReport />
             </ProtectedRoute>
           }
@@ -194,7 +203,7 @@ function App() {
         <Route
           path="/putaway-locations"
           element={
-            <ProtectedRoute isAuthenticated={isAuthenticated}>
+            <ProtectedRoute token={token} userRole={userRole} allowedRoles={["admin"]}>
               <LocationManager grnData={grnData} setGrnData={setGrnData} grnItems={grnData} />
             </ProtectedRoute>
           }

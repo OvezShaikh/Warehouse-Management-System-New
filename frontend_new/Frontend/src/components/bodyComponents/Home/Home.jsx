@@ -95,7 +95,7 @@ const Home = () => {
   }, []);
 
   if (!cardData) {
-    return <div>Loading...</div>;
+    return <div className="text-slate-500 justify-center">Loading...</div>;
   }
 
   return (
@@ -129,7 +129,7 @@ const Home = () => {
       )}
 
       {/* Main Content */}
-      <Grid item md={10} sm={9} xs={11}  sx={{ width: '90%' }}>
+      <Grid item md={10} sm={9} xs={11}  sx={{ width: '100%' }}>
         <Grid
           container
           sx={{
@@ -141,7 +141,7 @@ const Home = () => {
           }}
         >
           {cardData.map((card, index) => (
-            <Grid item md={2.5} key={index}  sx={{ marginY: 3,}}>
+            <Grid item md={2.6} key={index}  sx={{ marginY: 3,}}>
               <InfoCard card={card} />
             </Grid>
           ))}

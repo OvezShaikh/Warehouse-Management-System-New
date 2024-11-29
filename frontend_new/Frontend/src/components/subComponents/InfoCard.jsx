@@ -9,7 +9,7 @@ export default function InfoCard({ card }) {
       <Card elevation={6} sx={{ mx: card.mx, my: card.my, borderRadius: 2 }}>
         <Box sx={{ display: "flex", alignItems: "center" }} pl={1}>
           <Box
-            p={1}
+            p={0.5}
             m={2}
             sx={{
               display: "flex",

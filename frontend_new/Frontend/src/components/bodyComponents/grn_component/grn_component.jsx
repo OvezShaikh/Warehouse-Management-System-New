@@ -222,8 +222,6 @@ const GRNComponent = () => {
 
       // Find the relevant item in the local GRN data (for now, used for validation)
       const item = grnData.items?.find((item) => item._id.toString() === itemId.toString());
-
-
       if (!item) {
         throw new Error(`Item with ID ${itemId} not found in GRN ${grnId}`);
       }
