@@ -9,7 +9,7 @@ const Footer = ({ companyName = "Unostar Value Chain Pvt Ltd", links = [
   { href: '/', label: 'Home' },
   { href: '/about-us', label: 'About' },
   { href: '/contact-us', label: 'Contact' },
-  { href: '/careers', label: 'Carrers' },
+  // { href: '/careers', label: 'Carrers' },
     ],
   socialLinks = [
     { href: 'https://www.linkedin.com/company/unostarvaluechain?originalSubdomain=in', label: 'LinkedIn', icon: <LinkedInIcon /> },

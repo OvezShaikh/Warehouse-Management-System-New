@@ -225,32 +225,32 @@ const Growth = () => {
             </Box>
           </Grid>
 
-          <Grid item xs={12} sm={12} md={6} sx={{ mb: 3 }}>
+          {/* <Grid item xs={12} sm={12} md={6} sx={{ mb: 3 }}>
             <Box sx={{ margin: 3, bgcolor: "white", borderRadius: 2, padding: 3, height: "100%", boxShadow: 3 }}>
               <Typography variant="h5" sx={{ m: 3, fontWeight: "bold" }}>
                 Visitors Growth
               </Typography>
               <VisitorsGrowthCharts recordVisitor={recordVisitor} />
             </Box>
-          </Grid>
+          </Grid> */}
 
           <Grid item xs={12} sm={12} md={6} sx={{ mb: 3 }}>
             <Box sx={{ margin: 3, bgcolor: "white", borderRadius: 2, padding: 3, height: "100%", boxShadow: 3 }}>
               <Typography variant="h5" sx={{ m: 3, fontWeight: "bold" }}>
-                Products Growth
+                Items Growth
               </Typography>
               <ProductsGrowthCharts grnData={grnData}/>
             </Box>
           </Grid>
 
-          <Grid item xs={12} sm={12} md={6} sx={{ mb: 3 }}>
+          {/* <Grid item xs={12} sm={12} md={6} sx={{ mb: 3 }}>
             <Box sx={{ margin: 3, bgcolor: "white", borderRadius: 2, padding: 3, height: "100%", boxShadow: 3 }}>
               <Typography variant="h5" sx={{ marginLeft: "12px", fontWeight: "bold" }}>
                 Customers Growth
               </Typography>
               <CustomersGrowthCharts/>
             </Box>
-          </Grid>
+          </Grid> */}
         </Grid>
       </Grid>
     </Box>

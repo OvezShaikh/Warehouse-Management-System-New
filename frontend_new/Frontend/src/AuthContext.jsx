@@ -16,8 +16,8 @@ export const AuthProvider = ({ children }) => {
     if (token) {
       try {
         const decodedToken = jwtDecode(token); 
-        console.log('Original token', token);
-        console.log('Decoded Token:', decodedToken);
+        // console.log('Original token', token);
+        // console.log('Decoded Token:', decodedToken);
 
         if (decodedToken.exp * 1000 < Date.now()) {
           logout(); 

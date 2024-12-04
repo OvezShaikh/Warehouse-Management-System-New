@@ -19,7 +19,7 @@ import Inventory from "./components/bodyComponents/inventory/Inventory";
 import Customer from "./components/bodyComponents/customer/Customer";
 import Revenue from "./components/bodyComponents/revenue/Revenue";
 import Growth from "./components/bodyComponents/growth/Growth";
-import Report from "./components/bodyComponents/report/Report";
+// import Report from "./components/bodyComponents/report/Report";
 import Login from "./components/Login";
 import Register from "./components/Register";
 import ProfilePage from "./components/ProfilePage";
@@ -57,7 +57,7 @@ function App() {
       try {
         const response = await fetch(`${import.meta.env.VITE_API_URL}/api/grn`);
         const result = await response.json();
-        console.log("Fetched GRN Data:", result);
+        // console.log("Fetched GRN Data:", result);
         setGrnData(result.grns);
       } catch (error) {
         console.error("Error fetching GRN data:", error);
@@ -100,7 +100,7 @@ function App() {
         <Route path="/login" element={<Login />} />
         <Route path="/contact-us" element={<ContactSection />} />
         <Route path="/about-us" element={<AboutUs />} />
-        <Route path="/careers" element={<Careers />} />
+        {/* <Route path="/careers" element={<Careers />} /> */}
         <Route path="/in-plant-logistics" element={<InplantLogistics />} />
 
         {/* Protected Routes */}
@@ -160,14 +160,14 @@ function App() {
             </ProtectedRoute>
           }
         />
-        <Route
+        {/* <Route
           path="/reports"
           element={
             <ProtectedRoute token={token} userRole={userRole} allowedRoles={["admin"]}>
               <Report />
             </ProtectedRoute>
           }
-        />
+        /> */}
         <Route
           path="/settings"
           element={

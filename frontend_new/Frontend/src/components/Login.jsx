@@ -31,7 +31,6 @@ export default function Login() {
   
       // Use the login method from AuthContext to set token and auth state
       login(token,  { username, profilePicture });
-  
       navigate('/home');  // Redirect to home page after successful login
     } catch (error) {
       if (error.response) {

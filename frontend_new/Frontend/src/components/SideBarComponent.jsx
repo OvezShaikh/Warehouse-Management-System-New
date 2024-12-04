@@ -37,11 +37,10 @@ const SideBarComponent = () => {
     { title: "QualityCheck", component: <ThumbUpOffAltOutlined fontSize="medium" color="primary" /> },
     { title: "GrnReport", component: <DescriptionOutlined fontSize="medium" color="primary" /> },
     // { title: "Orders", component: <CardTravelOutlined fontSize="medium" color="primary" /> },
-    { title: "Customers", component: <PeopleAltOutlined fontSize="medium" color="primary" /> },
-    { title: "Revenue", component: <MonetizationOnOutlined fontSize="medium" color="primary" /> },
+    // { title: "Customers", component: <PeopleAltOutlined fontSize="medium" color="primary" /> },
+    // { title: "Revenue", component: <MonetizationOnOutlined fontSize="medium" color="primary" /> },
     { title: "Growth", component: <TrendingUpOutlined fontSize="medium" color="primary" /> },
-    // { title: "Reports", component: <DescriptionOutlined fontSize="medium" color="primary" /> },
-    { title: "Settings", component: <SettingsOutlined fontSize="medium" color="primary" /> },
+    // { title: "Settings", component: <SettingsOutlined fontSize="medium" color="primary" /> },
     
     
 

@@ -114,9 +114,9 @@ const ProfilePage = () => {
             {userRole ? userRole.charAt(0).toUpperCase() + userRole.slice(1).toLowerCase() : 'No role available'}
             </Typography>
             <Box sx={{ display: 'flex', gap: 2, mt: 3 }}>
-              <Button variant="contained" color="primary" onClick={() => navigate('/settings')}>
+              {/* <Button variant="contained" color="primary" onClick={() => navigate('/settings')}>
                 Edit Profile
-              </Button>
+              </Button> */}
               <Button variant="outlined" color="secondary" onClick={handleLogout}>
                 Logout
               </Button>

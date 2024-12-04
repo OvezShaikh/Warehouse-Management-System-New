@@ -32,8 +32,8 @@ export default function NavBarComponent() {
   const [anchorEl, setAnchorEl] = useState(null);
   const [servicesAnchorEl, setServicesAnchorEl] = useState(null); // State for the Services dropdown
   const open = Boolean(anchorEl);
-  const notificationOpen = Boolean(notificationAnchorEl); // State for notification menu open
-  const servicesOpen = Boolean(servicesAnchorEl); // State to track dropdown state
+  // const notificationOpen = Boolean(notificationAnchorEl); // State for notification menu open
+  // const servicesOpen = Boolean(servicesAnchorEl); // State to track dropdown state
   const navigate = useNavigate();
 
   const handleAvatarClicked = (event) => {
@@ -57,13 +57,13 @@ export default function NavBarComponent() {
     setAnchorEl(null);
   };
 
-  const notificationHandleClose = () => {
-    setNotificationAnchorEl(null); // Close notification menu
-  };
+  // const notificationHandleClose = () => {
+  //   setNotificationAnchorEl(null); // Close notification menu
+  // };
 
-  const servicesHandleClose = () => {
-    setServicesAnchorEl(null); // Close services dropdown
-  };
+  // const servicesHandleClose = () => {
+  //   setServicesAnchorEl(null); // Close services dropdown
+  // };
 
   const handleLogout = async () => {
     try {
@@ -321,12 +321,12 @@ export default function NavBarComponent() {
                           Profile
                         </MenuItem>
                         <Divider />
-                        <MenuItem onClick={handleSettingsClick}>
+                        {/* <MenuItem onClick={handleSettingsClick}>
                           <ListItemIcon>
                             <Settings fontSize="small" />
                           </ListItemIcon>
                           Settings
-                        </MenuItem>
+                        </MenuItem> */}
                         <MenuItem onClick={handleLogout}>
                           <ListItemIcon>
                             <Logout fontSize="small" />
