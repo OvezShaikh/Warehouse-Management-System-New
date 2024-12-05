@@ -19,7 +19,7 @@ export default function TopSellingProduct() {
   useEffect(() => {
     const fetchProducts = async () => {
       try {
-        const response = await axios.get("http://localhost:5000/api/grn");
+        const response = await axios.get(`${import.meta.env.VITE_API_URL}/api/grn`);
         const grns = response.data.grns;
 
         // Flattening the 'items' array to extract product details and sorting by quantity

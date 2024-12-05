@@ -4,22 +4,22 @@ import ApexCharts from "react-apexcharts";
 
 export default function SalesByCity() {
   const donutOption = {
-    labels: ["Dapodi", "Bopodi", "Supa", "Chakan"],
+    labels: ["India", "Middle-East", "Europe", "North-America"],
     legend: {
       position: "right",
       fontSize: "14",
 
       customLegendItems: [
-        "Dapodi <b>30.3%</b>",
-        "Bopodi <b>37.9%</b>",
-        "Supa <b>9.0%</b>",
-        "Chakan <b>22.8%</b>",
+        "India <b>37.9%</b>",
+        "Middle-East <b>30.3%</b>",
+        "Europe <b>22.8%</b>",
+        "North-America <b>9.0%</b>",
       ],
       //   const total = data.reduce((sum, value) => sum + value, 0);
       // const percentages = data.map(value => ((value / total) * 100).toFixed(2) + '%');
     },
     title: {
-      text: "Sales By City",
+      text: "Sales By Countries",
     },
   };
   const donutSeries = [44, 55, 13, 33];

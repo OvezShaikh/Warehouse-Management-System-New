@@ -49,10 +49,12 @@ const ProtectedRoute = ({ token, userRole, allowedRoles, children }) => {
 
 function App() {
   const [grnData, setGrnData] = useState([]);
+  const [loading, setLoading] = useState(true); // New state to handle loading
   const token = localStorage.getItem("token");
   const userRole = localStorage.getItem("userRole");
 
   useEffect(() => {
+    if (token) {
     const fetchGrnData = async () => {
       try {
         const response = await fetch(`${import.meta.env.VITE_API_URL}/api/grn`);
@@ -62,10 +64,16 @@ function App() {
       } catch (error) {
         console.error("Error fetching GRN data:", error);
       }
+      finally {
+        setLoading(false); // Once the data is fetched, stop loading
+      }
     };
 
     fetchGrnData();
-  }, []);
+  } else {
+    setLoading(false); // Stop loading if no token is found
+  }
+  }, [token]);
 
   const theme = createTheme({
     spacing: 4,

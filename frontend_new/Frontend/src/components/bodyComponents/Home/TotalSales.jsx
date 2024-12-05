@@ -1,11 +1,72 @@
 import { Box } from "@mui/material";
-import React from "react";
+import React, { useEffect, useState } from "react";
 import ApexCharts from "react-apexcharts";
+import axios from "axios";
 
 export default function TotalSales() {
+  const [chartData, setChartData] = useState({
+    series: [],
+    categories: [],
+  });
+
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        // Fetch data from the API
+        const response = await axios.get(`${import.meta.env.VITE_API_URL}/api/grn`);
+        const grnData = response.data.grns; // Extract 'grns' array
+
+        // Group GRN data by receiving date
+        const groupedData = grnData.reduce((acc, grn) => {
+          const date = new Date(grn.receivingDate).toLocaleDateString();
+          acc[date] = acc[date] || [];
+          acc[date].push(...grn.items);
+          return acc;
+        }, {});
+
+        // Get the current week's data
+        const currentWeekDates = Object.keys(groupedData);
+        const currentWeekData = currentWeekDates.map((date) =>
+          groupedData[date].reduce((sum, item) => sum + item.quantity, 0)
+        );
+
+        // Calculate previous week dates (assuming 7 days back from each current week date)
+        const previousWeekDates = currentWeekDates.map((date) =>
+          new Date(new Date(date).getTime() - 7 * 24 * 60 * 60 * 1000).toLocaleDateString()
+        );
+
+        // Map previous week dates to data
+        const previousWeekData = previousWeekDates.map((date) =>
+          groupedData[date]
+            ? groupedData[date].reduce((sum, item) => sum + item.quantity, 0)
+            : null // Mark missing data as null
+        );
+
+        // Prepare series data
+        const series = [
+          { name: "Current Week", data: currentWeekData },
+        ];
+
+        if (previousWeekData.some((data) => data !== null)) {
+          series.push({
+            name: "Previous Week",
+            data: previousWeekData.map((data) => (data !== null ? data : 0)), // Replace null with 0 for chart
+          });
+        }
+
+        setChartData({ categories: currentWeekDates, series });
+      } catch (error) {
+        console.error("Error fetching GRN data:", error);
+      }
+    };
+
+    fetchData();
+  }, []);
+
+  // Chart configuration
   const options = {
     title: {
-      text: "Totale Sales",
+      text: "Total Sales",
       align: "left",
       style: {
         fontSize: "16px",
@@ -24,11 +85,8 @@ export default function TotalSales() {
       curve: "smooth",
       width: 3,
     },
+    colors: ["#008FFB", "#FF4560"], // Colors for current and previous week lines
     legend: {
-      customLegendItems: [
-        "current Week  <b>$31,000<b/>",
-        "Previous Week <b>$37,000<b/>",
-      ],
       position: "top",
       horizontalAlign: "center",
       fontSize: "14px",
@@ -60,20 +118,16 @@ export default function TotalSales() {
       },
     },
     xaxis: {
-      categories: ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"],
+      categories: chartData.categories,
+      title: {
+        text: "Receiving Dates",
+      },
+    },
+    noData: {
+      text: "No data Available...",
     },
   };
-  const series = [
-    {
-      type: "line", //here we can define multiple type of chart in the same box
-      name: "series-1",
-      data: [2000, 3200, 3250, 4700, 3900, 4900, 3200],
-    },
-    {
-      name: "series-2",
-      data: [1500, 1900, 1800, 2900, 2600, 3200, 2200],
-    },
-  ];
+
   return (
     <Box
       sx={{
@@ -86,7 +140,7 @@ export default function TotalSales() {
     >
       <ApexCharts
         options={options}
-        series={series}
+        series={chartData.series}
         height={300}
         type="line"
         width="100%"
