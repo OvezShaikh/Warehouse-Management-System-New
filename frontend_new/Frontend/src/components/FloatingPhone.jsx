@@ -5,6 +5,7 @@ import { FiBatteryCharging, FiWifi } from "react-icons/fi";
 import { Box, Button } from "@mui/material"; 
 import { useAuth } from '../AuthContext'; // Import the useAuth hook
 import { toast } from 'react-toastify'; // Import toast
+import images from "../constants/images";
 
 const Example = () => {
   return (
@@ -97,7 +98,7 @@ const Screen = () => {
         overflow: "hidden",
       }}
     >
-      <svg
+      {/* <svg
         width="50"
         height="39"
         viewBox="0 0 50 39"
@@ -107,8 +108,9 @@ const Screen = () => {
       >
         <path d="M16.4992 2H37.5808L22.0816 24.9729H1L16.4992 2Z" />
         <path d="M17.4224 27.102L11.4192 36H33.5008L49 13.0271H32.7024L23.2064 27.102H17.4224Z" />
-      </svg>
+      </svg> */}
 
+      <img src={images.Logo2}></img>
       <Button
         variant="contained"
         onClick={handleGetStartedClick} // Call the click handler

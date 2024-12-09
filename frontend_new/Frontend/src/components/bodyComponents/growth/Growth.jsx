@@ -88,7 +88,7 @@ const Growth = () => {
 
       const totalGRNs = data.grns.length; // Total GRNs
       console.log(data.grns.length, "grns length");
-      const totalItems = data.grns.reduce((sum, grn) => sum + grn.items.length, 0); // Total items
+      const totalItems = data.grns.reduce((sum, grn) => sum + (Array.isArray(grn.items) ? grn.items.length : 0), 0);
       const pendingGRNs = data.grns.filter(grn => grn.status === "Pending").length; // Pending GRNs
       const uniqueSuppliers = [...new Set(data.grns.map(grn => grn.supplier))].length; // Unique suppliers
 

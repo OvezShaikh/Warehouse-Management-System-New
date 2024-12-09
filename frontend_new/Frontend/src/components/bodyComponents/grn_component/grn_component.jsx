@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useCallback } from "react";
 import { ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
-import { Box, Typography, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Paper, TextField, Button, Select, MenuItem, } from "@mui/material";
+import { Box, Typography, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Paper, TextField, Button, Select, MenuItem, TablePagination } from "@mui/material";
 import axios from 'axios';
 import ExcelJS from 'exceljs';
 // import { QrReader } from 'react-qr-reader';
@@ -18,6 +18,7 @@ const GRNComponent = () => {
   const [filteredGrns, setFilteredGrns] = useState([]);
   const [searchPoNumber, setSearchPoNumber] = useState(""); // Search state for P.O Number
   const [allGrns, setAllGrns] = useState([]);  // This state will hold all GRNs
+  const [totalGrns, setTotalGrns] = useState([]);
   const [qrData, setQrData] = useState("");
   const [isScannerOpen, setIsScannerOpen] = useState(false);
   const [loading, setLoading] = useState(false); // State to track loading
@@ -27,7 +28,7 @@ const GRNComponent = () => {
   const [loadingGrnId, setLoadingGrnId] = useState(null);
   const today = format(new Date(), 'yyyy-MM-dd');
   const {userRole} = useAuth();
-
+  
 
 
   const toggleToastVisibility = () => {
@@ -70,7 +71,7 @@ const GRNComponent = () => {
                   SerialNumber: values[6] || 'Default-SN',
                   InvoiceNo: values[7] || 'Default Invoice',
                   Location: values[8] || 'Unknown',
-                  ReceivingDate: new Date().toLocaleDateString(), // Assuming the receiving date is now
+                  ReceivingDate: values[9] || new Date().toLocaleDateString(), // Assuming the receiving date is now
                 }
               ]
             };
@@ -85,7 +86,7 @@ const GRNComponent = () => {
           const grns = parsedData.map(grn => ({
             poNumber: grn.PONumber,
             receivingNo: `GRN-${grn.ReceivingNo}`,
-            receivingDate: new Date().toLocaleDateString(), // If not available in the scanned data
+            receivingDate: grn.receivingDate || new Date().toLocaleDateString(), // If not available in the scanned data
             supplier: grn.Supplier,
             items: grn.items.map(item => ({
               itemNo: item.ItemNo,
@@ -94,7 +95,7 @@ const GRNComponent = () => {
               serialNumber: item.SerialNumber,
               invoiceNo: item.InvoiceNo,
               dockCode: item.docklocation || item.dockCode,
-              receivingDate: new Date().toLocaleDateString(), // If not available in the scanned data
+              receivingDate: item.ReceivingDate, // If not available in the scanned data
             }))
           }));
 
@@ -163,6 +164,7 @@ const GRNComponent = () => {
 
         if (Array.isArray(response.data.grns)) {
           setAllGrns(response.data.grns);  // Update the state with all GRNs
+          setTotalGrns(response.data.total);
         } else {
           console.error("Backend response is not in expected format:", response.data);
           // setAllGrns([]);  // Reset if the response is not in expected format
@@ -308,6 +310,10 @@ const GRNComponent = () => {
 
         const poNumber = row.getCell(1).value; // P.O. Number
         const receivingNo = `GRN-${row.getCell(5).value}`; // Receiving No.
+        const receivingDate = row.getCell(9).value instanceof Date
+          ? row.getCell(9).value.toLocaleDateString()  // Format as string if it's a valid Date
+          : new Date().toLocaleDateString();  // Fallback to today's date if invalid or empty
+
         const itemData = {
           itemNo: row.getCell(2).value,
           description: row.getCell(3).value,
@@ -315,7 +321,7 @@ const GRNComponent = () => {
           serialNumber: row.getCell(7).value || "Default-SN",
           invoiceNo: row.getCell(8).value,
           location: row.getCell(10).value,
-          receivingDate: new Date().toLocaleDateString(),
+          receivingDate: receivingDate,
         };
 
         let existingGRN = grnDataArray.find(grn => grn.poNumber === poNumber && grn.receivingNo === receivingNo);
@@ -324,7 +330,7 @@ const GRNComponent = () => {
           existingGRN = {
             poNumber: poNumber,
             receivingNo: receivingNo,
-            receivingDate: new Date().toLocaleDateString(), // You can adjust this as needed
+            receivingDate: receivingDate, // You can adjust this as needed
             supplier: row.getCell(6).value, // Supplier
             status: 'Pending', // Default status
             items: [],
@@ -391,25 +397,6 @@ const GRNComponent = () => {
     }
   };
 
-  // const handleSaveGRNs = async () => {
-  //   try {
-  //     const savedGrns = [];
-  //     for (const grn of grnData) {
-  //       const response = await axios.post(`${import.meta.env.VITE_API_URL}/api/grn`, grnDataToPost);
-  //       savedGrns.push(response.data);
-  //     }
-
-  //     // After saving, fetch the latest data from the backend
-  //     fetchCreatedGrns();
-
-  //     setGrnData([]); // Optionally clear the local GRN data to avoid duplicate entries
-  //     alert("All GRNs added successfully.");
-  //   } catch (error) {
-  //     console.error("Error posting GRN data:", error);
-  //     setErrorMessage("Failed to post GRN data for some items. Please check the console for details.");
-  //   }
-  // };
-
   useEffect(() => {
     console.log("Created GRNs Updated", createdGrns);
   }, [createdGrns]);
@@ -428,46 +415,44 @@ const GRNComponent = () => {
       // Fetch the GRN to get the list of items
       const grnResponse = await axios.get(`${import.meta.env.VITE_API_URL}/api/grn/${grnId}`);
       const grnData = grnResponse.data;
-  
+
       // Loop through each item in the GRN and update stock
       for (const item of grnData.items) {
         const location = liveLocations.find((loc) => loc.locationCode === item.dockCode);
         if (location) {
           const updatedStock = location.currentLoad - item.quantity;
-  
+
           // Update the stock in the location (allowing it to go negative)
           await axios.patch(`${import.meta.env.VITE_API_URL}/api/locations/${location._id}/stock`, {
             stock: updatedStock,
           });
         }
       }
-  
+
       // Make API request to delete the GRN
       await axios.delete(`${import.meta.env.VITE_API_URL}/api/grn/${grnId}`);
-  
+
       // Remove the GRN from the frontend state
       setAllGrns((prevState) => prevState.filter((grn) => grn._id !== grnId));
-  
+
       alert("GRN and stock updated successfully.");
     } catch (error) {
       console.error("Error deleting GRN:", error);
       alert("Failed to delete GRN.");
     }
   };
-  
+
 
   const handleDeleteItem = async (grnId, itemNo) => {
-    
+
 
     if (userRole !== 'admin') {
       toast.error("You do not have permission to delete items.");
       return;
     }
     try {
-      // Send request to backend to delete the individual item
       await axios.delete(`${import.meta.env.VITE_API_URL}/api/grn/${grnId}/item/${itemNo}`);
 
-      // Update state by removing the item from the GRN in the state
       setCreatedGrns((prevState) =>
         prevState.map((grn) =>
           grn._id === grnId
@@ -509,48 +494,7 @@ const GRNComponent = () => {
   }, [toastVisible]);
 
 
-  // useEffect(() => {
-  //   // Poll for updated data every 10 seconds
-  //   const interval = setInterval(() => {
-  //     axios.get('/api/grn')  // Replace with your API endpoint
-  //       .then((response) => {
-  //         setGrns(response.data);
-  //       })
-  //       .catch((error) => {
-  //         console.error('Error fetching GRNs:', error);
-  //       });
-  //   }, 10000);
-
-  //   // Cleanup polling interval when component unmounts
-  //   return () => clearInterval(interval);
-  // }, []);
-
-  // useEffect(() => {
-  //   // Function to fetch GRNs data from the API
-  //   const fetchGrns = async () => {
-  //     try {
-  //       const response = await axios.get(`${import.meta.env.VITE_API_URL}/api/grn`); // Your API endpoint to fetch GRNs
-  //       setGrns(response.data); // Set the fetched data into the state
-  //     } catch (error) {
-  //       console.error('Error fetching GRNs:', error);
-  //     }
-  //   };
-
-  //   // Fetch data initially when the component mounts
-  //   fetchGrns();
-
-  //   // Poll for updated data every 10 seconds
-  //   const interval = setInterval(() => {
-  //     fetchGrns(); // Call the fetch function to get the updated GRNs
-  //   }, 10000); // Update every 10 seconds
-
-  //   // Cleanup polling interval when component unmounts
-  //   return () => clearInterval(interval);
-  // }, []); // Empty dependency array ensures this only runs once when the component mounts
-
-
-
-
+  
   return (
     <Box sx={{ padding: 4 }}>
       {toastVisible && (
@@ -667,7 +611,7 @@ const GRNComponent = () => {
       {errorMessage && <Typography color="error">{errorMessage}</Typography>}
 
       {/* Table for Created GRNs (Filtered based on search) */}
-      <TableContainer component={Paper} sx={{ marginTop: 4 }}>
+      <TableContainer component={Paper} sx={{ marginTop: 4, height: '600px' }}>
         <Table aria-label="Created GRNs">
           <TableHead>
             <TableRow style={{ width: '100%' }}>
@@ -698,6 +642,7 @@ const GRNComponent = () => {
                 .filter((grn) =>
                   (grn.poNumber || "").toLowerCase().includes(searchPoNumber.trim().toLowerCase())
                 )
+                // .slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage)
                 .map((grn) => (
                   <React.Fragment key={grn._id}>
                     {/* GRN Header Row */}

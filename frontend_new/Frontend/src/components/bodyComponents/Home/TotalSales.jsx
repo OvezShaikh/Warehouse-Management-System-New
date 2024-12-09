@@ -2,6 +2,7 @@ import { Box } from "@mui/material";
 import React, { useEffect, useState } from "react";
 import ApexCharts from "react-apexcharts";
 import axios from "axios";
+import { startOfWeek, endOfWeek, subWeeks, parseISO, format, addDays } from "date-fns";
 
 export default function TotalSales() {
   const [chartData, setChartData] = useState({
@@ -9,52 +10,72 @@ export default function TotalSales() {
     categories: [],
   });
 
+  const generateDateRange = (start, end) => {
+    const dates = [];
+    let current = start;
+    while (current <= end) {
+      dates.push(format(current, "yyyy-MM-dd"));
+      current = addDays(current, 1);
+    }
+    return dates;
+  };
+
   useEffect(() => {
     const fetchData = async () => {
       try {
-        // Fetch data from the API
         const response = await axios.get(`${import.meta.env.VITE_API_URL}/api/grn`);
-        const grnData = response.data.grns; // Extract 'grns' array
+        const grnData = response.data.grns;
 
-        // Group GRN data by receiving date
-        const groupedData = grnData.reduce((acc, grn) => {
-          const date = new Date(grn.receivingDate).toLocaleDateString();
-          acc[date] = acc[date] || [];
-          acc[date].push(...grn.items);
+        const now = new Date();
+        const currentWeekStart = startOfWeek(now, { weekStartsOn: 1 });
+        const currentWeekEnd = endOfWeek(now, { weekStartsOn: 1 });
+
+        const previousWeekStart = subWeeks(currentWeekStart, 1);
+        const previousWeekEnd = subWeeks(currentWeekEnd, 1);
+
+        const allItems = grnData.flatMap((grn) =>
+          grn.items.map((item) => ({
+            ...item,
+            receivingDate: item.receivingDate,
+          }))
+        );
+
+        // Generate full date ranges for the current and previous weeks
+        const currentWeekRange = generateDateRange(currentWeekStart, currentWeekEnd);
+        const previousWeekRange = generateDateRange(previousWeekStart, previousWeekEnd);
+
+        // Initialize data objects with 0 values for all dates
+        const currentWeekData = currentWeekRange.reduce((acc, date) => {
+          acc[date] = 0;
           return acc;
         }, {});
 
-        // Get the current week's data
-        const currentWeekDates = Object.keys(groupedData);
-        const currentWeekData = currentWeekDates.map((date) =>
-          groupedData[date].reduce((sum, item) => sum + item.quantity, 0)
-        );
+        const previousWeekData = previousWeekRange.reduce((acc, date) => {
+          acc[date] = 0;
+          return acc;
+        }, {});
 
-        // Calculate previous week dates (assuming 7 days back from each current week date)
-        const previousWeekDates = currentWeekDates.map((date) =>
-          new Date(new Date(date).getTime() - 7 * 24 * 60 * 60 * 1000).toLocaleDateString()
-        );
+        // Sum quantities for the current week
+        allItems.forEach((item) => {
+          const itemDate = format(parseISO(item.receivingDate), "yyyy-MM-dd");
+          if (itemDate in currentWeekData) {
+            currentWeekData[itemDate] += item.quantity;
+          }
+          if (itemDate in previousWeekData) {
+            previousWeekData[itemDate] += item.quantity;
+          }
+        });
 
-        // Map previous week dates to data
-        const previousWeekData = previousWeekDates.map((date) =>
-          groupedData[date]
-            ? groupedData[date].reduce((sum, item) => sum + item.quantity, 0)
-            : null // Mark missing data as null
-        );
+        // Prepare categories and series
+        const currentWeekSeriesData = currentWeekRange.map((date) => currentWeekData[date]);
+        const previousWeekSeriesData = previousWeekRange.map((date) => previousWeekData[date]);
 
-        // Prepare series data
         const series = [
-          { name: "Current Week", data: currentWeekData },
+          { name: "Current Week", data: currentWeekSeriesData },
+          { name: "Previous Week", data: previousWeekSeriesData },
         ];
 
-        if (previousWeekData.some((data) => data !== null)) {
-          series.push({
-            name: "Previous Week",
-            data: previousWeekData.map((data) => (data !== null ? data : 0)), // Replace null with 0 for chart
-          });
-        }
-
-        setChartData({ categories: currentWeekDates, series });
+        setChartData({ categories: currentWeekRange, series });
       } catch (error) {
         console.error("Error fetching GRN data:", error);
       }
@@ -63,69 +84,41 @@ export default function TotalSales() {
     fetchData();
   }, []);
 
-  // Chart configuration
   const options = {
     title: {
       text: "Total Sales",
       align: "left",
-      style: {
-        fontSize: "16px",
-        color: "#666",
-      },
+      style: { fontSize: "16px", color: "#666" },
     },
     subtitle: {
       text: "Sales over time",
       align: "left",
-      style: {
-        fontSize: "16px",
-        color: "#666",
-      },
+      style: { fontSize: "16px", color: "#666" },
     },
-    stroke: {
-      curve: "smooth",
-      width: 3,
-    },
-    colors: ["#008FFB", "#FF4560"], // Colors for current and previous week lines
+    stroke: { curve: "smooth", width: 3 },
+    colors: ["#008FFB", "#FF4560"],
     legend: {
       position: "top",
       horizontalAlign: "center",
       fontSize: "14px",
-      fontFamily: "Helvetica, Arial",
       offsetY: -20,
     },
     markers: {
       size: 4,
       strokeWidth: 2,
-      hover: {
-        size: 9,
-      },
-    },
-    theme: {
-      mode: "light",
+      hover: { size: 9 },
     },
     chart: {
       height: 328,
       type: "line",
-      zoom: {
-        enabled: true,
-      },
-      dropShadow: {
-        enabled: true,
-        top: 3,
-        left: 2,
-        blur: 4,
-        opacity: 0.2,
-      },
+      zoom: { enabled: true },
+      dropShadow: { enabled: true, top: 3, left: 2, blur: 4, opacity: 0.2 },
     },
     xaxis: {
       categories: chartData.categories,
-      title: {
-        text: "Receiving Dates",
-      },
+      title: { text: "Receiving Dates" },
     },
-    noData: {
-      text: "No data Available...",
-    },
+    noData: { text: "No data Available..." },
   };
 
   return (
