@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import axios from "axios";
 import { Box, Button, TextField, Typography, Paper, Container } from '@mui/material';
 import { useAuth } from '../AuthContext'; // Import the useAuth hook
+import images from '../constants/images';
 
 export default function Login() {
   const [email, setEmail] = useState(''); 
@@ -45,36 +46,75 @@ export default function Login() {
   
 
   return (
-    <Container maxWidth="sm">
-      <Paper elevation={3} sx={{ padding: 4, mt: 5 }}>
-        <Typography variant="h5" sx={{ mb: 3 }}>
-          Login
-        </Typography>
-        {error && (
-          <Typography variant="body2" color="error" sx={{ mb: 2 }}>
-            {error}
+    <Container maxWidth="md"> {/* Adjust container size for better layout */}
+      <Paper
+        elevation={3}
+        sx={{
+          display: "flex",
+          flexDirection: "row",
+          justifyContent: "space-between",
+          alignItems: "center",
+          padding: 4,
+          mt: 5,
+        }}
+      >
+        {/* Left Side: Login Form */}
+        <Box sx={{ flex: 1, pr: 4 }}>
+          <Typography variant="h5" sx={{ mb: 3 }}>
+            Login
           </Typography>
-        )}
-        <TextField
-          label="Email"
-          fullWidth
-          variant="outlined"
-          sx={{ mb: 2 }}
-          value={email}
-          onChange={(e) => setEmail(e.target.value)}
-        />
-        <TextField
-          label="Password"
-          fullWidth
-          variant="outlined"
-          type="password"
-          sx={{ mb: 3 }}
-          value={password}
-          onChange={(e) => setPassword(e.target.value)}
-        />
-        <Button variant="contained" color="primary" fullWidth onClick={handleLogin}>
-          Login
-        </Button>
+          {error && (
+            <Typography variant="body2" color="error" sx={{ mb: 2 }}>
+              {error}
+            </Typography>
+          )}
+          <TextField
+            label="Email"
+            fullWidth
+            variant="outlined"
+            sx={{ mb: 2 }}
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+          />
+          <TextField
+            label="Password"
+            fullWidth
+            variant="outlined"
+            type="password"
+            sx={{ mb: 3 }}
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
+          />
+          <Button
+            variant="contained"
+            color="primary"
+            fullWidth
+            onClick={handleLogin}
+          >
+            Login
+          </Button>
+        </Box>
+
+        {/* Right Side: Image */}
+        <Box
+          sx={{
+            flex: 1,
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+          }}
+        >
+          <img
+            src={images.LoginPic}
+            alt="Login Illustration"
+            style={{
+              width: "100%",
+              height: "auto",
+              maxWidth: "400px", // Limit the size of the image
+              borderRadius: "8px",
+            }}
+          />
+        </Box>
       </Paper>
     </Container>
   );

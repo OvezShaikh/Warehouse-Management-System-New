@@ -20,6 +20,7 @@ import {
   ThumbUpOffAltOutlined,
   AddLocationAltOutlined,
   LocationOnOutlined,
+  ProductionQuantityLimitsOutlined,
 } from "@mui/icons-material";
 import { useLocation, useNavigate } from "react-router-dom";
 
@@ -38,8 +39,10 @@ const SideBarComponent = () => {
     { title: "GrnReport", component: <DescriptionOutlined fontSize="medium" color="primary" /> },
     // { title: "Orders", component: <CardTravelOutlined fontSize="medium" color="primary" /> },
     // { title: "Customers", component: <PeopleAltOutlined fontSize="medium" color="primary" /> },
-    // { title: "Revenue", component: <MonetizationOnOutlined fontSize="medium" color="primary" /> },
+    { title: "Report2", component: <MonetizationOnOutlined fontSize="medium" color="primary" /> },
+    { title: "ReturnToSupplier", component: <ProductionQuantityLimitsOutlined fontSize="medium" color="primary" /> },
     { title: "Growth", component: <TrendingUpOutlined fontSize="medium" color="primary" /> },
+
     // { title: "Settings", component: <SettingsOutlined fontSize="medium" color="primary" /> },
     
     

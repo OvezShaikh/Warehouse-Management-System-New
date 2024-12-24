@@ -27,19 +27,23 @@ import ContactSection from "./components/Contact";
 import AboutUs from "./components/AboutUs";
 import GRNComponent from "./components/bodyComponents/grn_component/GRNPage";
 import QualityCheck from "./components/bodyComponents/Qualitycomponent/QualityCheckPage";
-import Careers from "./components/Carrers";
+// import Careers from "./components/Carrers";
 import AddDockLocation from "./components/bodyComponents/DockLoc/Doclocation";
 import GRNReport from "./components/bodyComponents/grn_component/GRNReport";
 import LocationManager from "./components/bodyComponents/PutawayLocations/Putawaylocation";
-import SettingsPage from "./components/bodyComponents/Settings/Setting";
-import InplantLogistics from "./components/bodyComponents/staticpages/InplantLogistics";
+// import SettingsPage from "./components/bodyComponents/Settings/Setting";
+// import InplantLogistics from "./components/bodyComponents/staticpages/InplantLogistics";
+import Report2Component from "./components/bodyComponents/grn_component/Report2";
+// import GRNForm from "./components/bodyComponents/grn_component/GRNForm";
+import useFetchGrnData from "./hooks/useFetchGrnData";
+import Returntosupplier from "./components/bodyComponents/Returntosupplier/Returntosupplier";
 
 // ProtectedRoute Component
 const ProtectedRoute = ({ token, userRole, allowedRoles, children }) => {
   if (!token && !userRole) {
     return <Navigate to="/login" replace />;
   }
-
+  console.log("allowedRoles:", allowedRoles);
   if (allowedRoles && userRole && !allowedRoles.includes(userRole)) {
     return <Navigate to="/home" replace />;
   }
@@ -48,32 +52,34 @@ const ProtectedRoute = ({ token, userRole, allowedRoles, children }) => {
 };
 
 function App() {
-  const [grnData, setGrnData] = useState([]);
-  const [loading, setLoading] = useState(true); // New state to handle loading
+  // const [grnData, setGrnData] = useState([]);
+  // const [loading, setLoading] = useState(true); // New state to handle loading
   const token = localStorage.getItem("token");
   const userRole = localStorage.getItem("userRole");
 
-  useEffect(() => {
-    if (token) {
-    const fetchGrnData = async () => {
-      try {
-        const response = await fetch(`${import.meta.env.VITE_API_URL}/api/grn`);
-        const result = await response.json();
-        // console.log("Fetched GRN Data:", result);
-        setGrnData(result.grns);
-      } catch (error) {
-        console.error("Error fetching GRN data:", error);
-      }
-      finally {
-        setLoading(false); // Once the data is fetched, stop loading
-      }
-    };
+  // useEffect(() => {
+  //   if (token) {
+  //   const fetchGrnData = async () => {
+  //     try {
+  //       const response = await fetch(`${import.meta.env.VITE_API_URL}/api/grn`);
+  //       const result = await response.json();
+  //       // console.log("Fetched GRN Data:", result);
+  //       setGrnData(result.grns);
+  //     } catch (error) {
+  //       console.error("Error fetching GRN data:", error);
+  //     }
+  //     finally {
+  //       setLoading(false); // Once the data is fetched, stop loading
+  //     }
+  //   };
 
-    fetchGrnData();
-  } else {
-    setLoading(false); // Stop loading if no token is found
-  }
-  }, [token]);
+  //   fetchGrnData();
+  // } else {
+  //   setLoading(false); // Stop loading if no token is found
+  // }
+  // }, [token]);
+
+  const { grnData, setGrnData, loading, error } = useFetchGrnData(token);
 
   const theme = createTheme({
     spacing: 4,
@@ -108,8 +114,9 @@ function App() {
         <Route path="/login" element={<Login />} />
         <Route path="/contact-us" element={<ContactSection />} />
         <Route path="/about-us" element={<AboutUs />} />
+        {/* <Route path="/grnform" element={<GRNForm />} /> */}
         {/* <Route path="/careers" element={<Careers />} /> */}
-        <Route path="/in-plant-logistics" element={<InplantLogistics />} />
+        {/* <Route path="/in-plant-logistics" element={<InplantLogistics />} /> */}
 
         {/* Protected Routes */}
         <Route
@@ -123,7 +130,7 @@ function App() {
         <Route
           path="/grn"
           element={
-            <ProtectedRoute token={token} userRole={userRole} allowedRoles={["admin"]}>
+            <ProtectedRoute token={token} userRole={userRole} allowedRoles={["admin", "user"]}>
               <GRNComponent grnData={grnData} setGrnData={setGrnData} />
             </ProtectedRoute>
           }
@@ -168,22 +175,30 @@ function App() {
             </ProtectedRoute>
           }
         />
-        {/* <Route
-          path="/reports"
+        <Route
+          path="/report2"
           element={
-            <ProtectedRoute token={token} userRole={userRole} allowedRoles={["admin"]}>
-              <Report />
+            <ProtectedRoute token={token} userRole={userRole} allowedRoles={["user", "admin"]}>
+              <Report2Component />
             </ProtectedRoute>
           }
-        /> */}
+        />
         <Route
+          path="/Returntosupplier"
+          element={
+            <ProtectedRoute token={token} userRole={userRole} allowedRoles={["user", "admin"]}>
+              <Returntosupplier grnData={grnData} setGrnData={setGrnData} />
+            </ProtectedRoute>
+          }
+        />
+        {/* <Route
           path="/settings"
           element={
             <ProtectedRoute token={token} userRole={userRole} allowedRoles={["user", "admin"]}>
               <SettingsPage />
             </ProtectedRoute>
           }
-        />
+        /> */}
         <Route
           path="/profile"
           element={

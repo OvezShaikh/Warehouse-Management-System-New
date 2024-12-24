@@ -14,7 +14,7 @@ const Footer = ({ companyName = "Unostar Value Chain Pvt Ltd", links = [
   socialLinks = [
     { href: 'https://www.linkedin.com/company/unostarvaluechain?originalSubdomain=in', label: 'LinkedIn', icon: <LinkedInIcon /> },
     { href: '#', label: 'Twitter', icon: <TwitterIcon /> },
-    { href: '#', label: 'Facebook', icon: <FacebookIcon /> },]
+    { href: 'https://www.facebook.com/profile.php?id=100064143517360&mibextid=ZbWKwL', label: 'Facebook', icon: <FacebookIcon /> },]
 
    }) => {
 

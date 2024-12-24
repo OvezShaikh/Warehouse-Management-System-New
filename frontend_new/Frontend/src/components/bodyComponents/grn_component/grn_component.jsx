@@ -4,7 +4,6 @@ import 'react-toastify/dist/ReactToastify.css';
 import { Box, Typography, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Paper, TextField, Button, Select, MenuItem, TablePagination } from "@mui/material";
 import axios from 'axios';
 import ExcelJS from 'exceljs';
-// import { QrReader } from 'react-qr-reader';
 import QrScanner from 'react-qr-scanner';
 import { format } from 'date-fns';
 import { useAuth } from "../../../AuthContext";

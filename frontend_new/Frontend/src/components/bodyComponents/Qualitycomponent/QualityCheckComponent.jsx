@@ -1,275 +1,212 @@
-import React, { useState, useEffect } from "react";
-import {
-  Box,
-  Typography,
-  Table,
-  TableBody,
-  TableCell,
-  TableContainer,
-  TableHead,
-  TableRow,
-  Paper,
-  Select,
-  MenuItem,
-  Snackbar,
-  Alert,
-  CircularProgress,
-} from "@mui/material";
+import React, { useState, useEffect, useCallback } from "react";
+import { Box, Typography, Select, MenuItem, TextField } from "@mui/material";
+import { DataGrid } from "@mui/x-data-grid";
 import axios from "axios";
+import { toast, ToastContainer } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
 
 const QualityCheckComponent = () => {
-  const [grnData, setGrnData] = useState([]); // GRN data
-  const [liveLocations, setLiveLocations] = useState([]); // Locations from /locations API
-  const [loadingGrnId, setLoadingGrnId] = useState(null); // Loading state for each GRN
-  const [snackbarOpen, setSnackbarOpen] = useState(false); // Snackbar open state
-  const [snackbarMessage, setSnackbarMessage] = useState(""); // Snackbar message
-  const [errorMessage, setErrorMessage] = useState(""); // Error message for the snackbar
-
-  // Fetch GRN data and live locations when the component mounts
+  const [grnData, setGrnData] = useState([]);
+  const [timeouts, setTimeouts] = useState({});
+  const [rows, setRows] = useState([]);
+  
+  // Fetch GRN data
   useEffect(() => {
     const fetchGrnData = async () => {
       try {
-        const response = await axios.get(`${import.meta.env.VITE_API_URL}/api/grn`);
-        setGrnData(response.data.grns || []);
+        const response = await axios.get(
+          `${import.meta.env.VITE_API_URL}/api/grn`
+        );
+        const flatData = response.data.grns.flatMap((grn) =>
+          grn.items.map((item) => ({
+            id: `${grn._id}-${item._id}`, // Unique ID for DataGrid
+            poNumber: grn.poNumber || "N/A",
+            receivingNo: grn.receivingNo || "N/A",
+            itemNo: item.itemNo || "N/A",
+            itemQuantity: item.quantity || 0,
+            okQuantity: item.okQuantity || 0,
+            rejectedQuantity: item.rejectedQuantity || 0,
+            status: item.status || "Pending",
+            grnId: grn._id,
+            itemId: item._id,
+          }))
+        );
+        setRows(flatData);
+        setGrnData(response.data.grns);
       } catch (error) {
         console.error("Error fetching GRN data:", error);
-        setErrorMessage("Failed to fetch GRN data.");
+        toast.error("Failed to fetch GRN data.");
       }
     };
-
-    const fetchLiveLocations = async () => {
-      try {
-        const response = await axios.get(`${import.meta.env.VITE_API_URL}/api/locations`);
-        setLiveLocations(response.data.locations || []);
-      } catch (error) {
-        console.error("Error fetching locations:", error);
-        setErrorMessage("Failed to fetch live locations.");
-      }
-    };
-
     fetchGrnData();
-    fetchLiveLocations();
   }, []);
 
-  const handleSnackbarClose = () => {
-    setSnackbarOpen(false);
+  // Handle status change for each item
+  const handleStatusChange = (grnId, itemId, newStatus) => {
+    const updatedRows = rows.map((row) =>
+      row.id === `${grnId}-${itemId}` ? { ...row, status: newStatus } : row
+    );
+    setRows(updatedRows);
+
+    axios
+      .patch(`${import.meta.env.VITE_API_URL}/api/grn/${grnId}/item/${itemId}/status`, {
+        status: newStatus,
+      })
+      .then(() => toast.success("Status updated successfully!"))
+      .catch(() => toast.error("Failed to update status."));
   };
 
-  // const handleItemStatusChange = async (grnId, itemId, newStatus) => {
-  //   setLoadingGrnId(grnId);
+  // Handle quantity changes with debouncing
+  const handleQuantityChange = useCallback(
+    (grnId, itemId, newQuantity, type, event) => {
+      const parsedQuantity = newQuantity === "" ? null : parseInt(newQuantity, 10);
   
-  //   try {
-  //     // Update the item status
-  //     const response = await axios.patch(
-  //       `${import.meta.env.VITE_API_URL}/api/grn/${grnId}/item/${itemId}/status`,
-  //       { status: newStatus }
-  //     );
-  
-  //     if (response.status === 200) {
-  //       setGrnData((prevGrns) =>
-  //         prevGrns.map((grn) =>
-  //           grn._id === grnId
-  //             ? {
-  //                 ...grn,
-  //                 items: grn.items.map((item) =>
-  //                   item._id === itemId ? { ...item, status: newStatus } : item
-  //                 ),
-  //               }
-  //             : grn
-  //         )
-  //       );
-  //       setSnackbarMessage("Item status updated successfully!");
-  //     } else {
-  //       throw new Error("Failed to update item status");
-  //     }
-  //   } catch (error) {
-  //     console.error("Error updating item status:", error);
-  //     setSnackbarMessage("Failed to update item status.");
-  //   } finally {
-  //     setSnackbarOpen(true);
-  //     setLoadingGrnId(null);
-  //   }
-  // };
-
-  // Handle changing the dock location for a specific item
-  
-  const handleItemStatusChange = async (grnId, itemId, newStatus) => {
-    setLoadingGrnId(grnId);
-  
-    try {
-      // Update the item's status
-      const response = await axios.patch(
-        `${import.meta.env.VITE_API_URL}/api/grn/${grnId}/item/${itemId}/status`,
-        { status: newStatus }
-      );
-  
-      if (response.status === 200) {
-        // Update the local state for the item's status
-        setGrnData((prevGrns) =>
-          prevGrns.map((grn) =>
-            grn._id === grnId
-              ? {
-                  ...grn,
-                  items: grn.items.map((item) =>
-                    item._id === itemId ? { ...item, status: newStatus } : item
-                  ),
-                }
-              : grn
-          )
-        );
-  
-        // Evaluate GRN status based on the updated item statuses
-        const updatedGrn = grnData.find((grn) => grn._id === grnId);
-        const allOk = updatedGrn.items.every((item) =>
-          item._id === itemId ? newStatus === "OK" : item.status === "OK"
-        );
-        const anyRejected = updatedGrn.items.some((item) =>
-          item._id === itemId ? newStatus === "Rejected" : item.status === "Rejected"
-        );
-  
-        let grnStatus = "Pending";
-        if (anyRejected) {
-          grnStatus = "Rejected";
-        } else if (allOk) {
-          grnStatus = "OK";
+      // Check for invalid input
+      const invalidInputKey = `${grnId}-${itemId}-invalid-input`;
+      if (newQuantity !== "" && isNaN(parsedQuantity)) {
+        try {
+          if (!toast.isActive(invalidInputKey)) {
+            toast.error("Please enter a valid number.", { toastId: invalidInputKey , autoClose: 2000});
+          }
+        } catch (error) {
+          console.error("Error displaying invalid input toast:", error);
         }
-  
-        // Update the GRN status using your existing API
-        const grnStatusResponse = await axios.patch(
-          `${import.meta.env.VITE_API_URL}/api/grn/${grnId}/status`,
-          { status: grnStatus }
-        );
-  
-        if (grnStatusResponse.status === 200) {
-          setSnackbarMessage("Item and GRN status updated successfully!");
-        } else {
-          throw new Error("Failed to update GRN status");
-        }
-      } else {
-        throw new Error("Failed to update item status");
+        return;
       }
-    } catch (error) {
-      console.error("Error updating item or GRN status:", error);
-      setSnackbarMessage("Failed to update item or GRN status.");
-    } finally {
-      setSnackbarOpen(true);
-      setLoadingGrnId(null);
-    }
-  };
   
-  // const handleLocationChange = async (grnId, itemId, newLocation, newStatus) => {
-  //   setLoadingGrnId(grnId);
+      setRows((prevRows) => {
+        return prevRows.map((row) => {
+          if (row.id === `${grnId}-${itemId}`) {
+            const updatedRow = { ...row, [type]: parsedQuantity };
   
-  //   try {
-  //     const response = await axios.patch(
-  //       `${import.meta.env.VITE_API_URL}/api/grn/${grnId}/item/${itemId}/location`,
-  //       { dockLocation: newLocation, status: newStatus }
-  //     );
+            // Perform validation: OK + Rejected cannot exceed Item Quantity
+            const totalQuantity =
+              (updatedRow.okQuantity || 0) + (updatedRow.rejectedQuantity || 0);
   
-  //     if (response.status === 200) {
-  //       setGrnData((prevGrns) =>
-  //         prevGrns.map((grn) =>
-  //           grn._id === grnId
-  //             ? {
-  //                 ...grn,
-  //                 items: grn.items.map((item) =>
-  //                   item._id === itemId
-  //                     ? { ...item, dockLocation: newLocation, status: newStatus }
-  //                     : item
-  //                 ),
-  //               }
-  //             : grn
-  //         )
-  //       );
-  //       setSnackbarMessage("Dock location and status updated successfully!");
-  //     } else {
-  //       throw new Error("Failed to update dock location and status");
-  //     }
-  //   } catch (error) {
-  //     console.error("Error updating dock location and status:", error);
-  //     setSnackbarMessage("Failed to update location and status.");
-  //   } finally {
-  //     setSnackbarOpen(true);
-  //     setLoadingGrnId(null);
-  //   }
-  // };
+            const quantityErrorKey = `${grnId}-${itemId}-quantity-error`;
+            if (totalQuantity > row.itemQuantity) {
+              updatedRow[type] = 0; // Reset the invalid value to 0
+  
+              try {
+                if (!toast.isActive(quantityErrorKey)) {
+                  toast.error(
+                    "Total OK and Rejected quantities cannot exceed Item Quantity.",
+                    { toastId: quantityErrorKey, autoClose: 2000 }
+                  );
+                }
+              } catch (error) {
+                console.error("Error displaying quantity error toast:", error);
+              }
+  
+              return updatedRow; // Return updatedRow with reset value
+            }
+  
+            return updatedRow;
+          }
+          return row;
+        });
+      });
+  
+      // Delay API update with debouncing
+      if (timeouts[`${grnId}-${itemId}-${type}`]) {
+        clearTimeout(timeouts[`${grnId}-${itemId}-${type}`]);
+      }
+  
+      const timeoutId = setTimeout(async () => {
+        const successKey = `${grnId}-${itemId}-${type}-success`;
+        const errorKey = `${grnId}-${itemId}-${type}-error`;
+  
+        try {
+          await axios.patch(
+            `${import.meta.env.VITE_API_URL}/api/grn/${grnId}/item/${itemId}`,
+            { [type]: parsedQuantity }
+          );
+  
+          // Show success toast only if Enter is pressed
+          if (event.key === "Enter" && !toast.isActive(successKey)) {
+            toast.success("Quantity updated successfully!", { toastId: successKey , autoClose: 2000});
+          }
+        } catch (error) {
+          if (!toast.isActive(errorKey)) {
+            toast.error("Failed to update quantity.", { toastId: errorKey , autoClose: 2000});
+          }
+        }
+      }, 1000);
+  
+      setTimeouts((prev) => ({ ...prev, [`${grnId}-${itemId}-${type}`]: timeoutId }));
+    },
+    [timeouts]
+  );
+  
+
+  // Columns definition for DataGrid
+  const columns = [
+    { field: "poNumber", headerName: "PO No", flex: 1 },
+    { field: "receivingNo", headerName: "Receiving No", flex: 1 },
+    { field: "itemNo", headerName: "Item No", flex: 1 },
+    { field: "itemQuantity", headerName: "Item Quantity", flex: 1 },
+    {
+      field: "okQuantity",
+      headerName: "OK Quantity",
+      flex: 1,
+      renderCell: (params) => (
+        <TextField
+          size="small"
+          value={params.row.okQuantity || ""}
+          onChange={(e) => handleQuantityChange(params.row.grnId, params.row.itemId, e.target.value, "okQuantity", e)}
+          onKeyDown={(e) => handleQuantityChange(params.row.grnId, params.row.itemId, e.target.value, "okQuantity", e)}
+        />
+      ),
+    },
+    {
+      field: "rejectedQuantity",
+      headerName: "Rejected Quantity",
+      flex: 1,
+      renderCell: (params) => (
+        <TextField
+          size="small"
+          value={params.row.rejectedQuantity || ""}
+          onChange={(e) => handleQuantityChange(params.row.grnId, params.row.itemId, e.target.value, "rejectedQuantity", e)}
+          onKeyDown={(e) => handleQuantityChange(params.row.grnId, params.row.itemId, e.target.value, "rejectedQuantity", e)}
+        />
+      ),
+    },
+    {
+      field: "status",
+      headerName: "Item Status",
+      flex: 1,
+      renderCell: (params) => (
+        <Select
+          value={params.row.status}
+          onChange={(e) => handleStatusChange(params.row.grnId, params.row.itemId, e.target.value)}
+          size="small"
+        >
+          <MenuItem value="Pending">Pending</MenuItem>
+          <MenuItem value="OK">OK</MenuItem>
+          <MenuItem value="Rejected">Rejected</MenuItem>
+        </Select>
+      ),
+    },
+  ];
 
   return (
-    <Box sx={{ padding: 4 }}>
-      <Typography variant="h5" sx={{ fontWeight: "bold" }}>
+    <Box sx={{ padding: 4, backgroundColor: "white" }}>
+      <Typography variant="h5" sx={{ fontWeight: "bold", mb: 2 }}>
         Quality Check
       </Typography>
-
-      <TableContainer component={Paper} sx={{ marginTop: 2 }}>
-        <Table aria-label="Created GRNs">
-          <TableHead>
-            <TableRow>
-              <TableCell align="center">
-                <strong>Po No.</strong>
-              </TableCell>
-              <TableCell align="center">
-                <strong>Receiving No.</strong>
-              </TableCell>
-              <TableCell align="center">
-                <strong>Item No.</strong>
-              </TableCell>
-              <TableCell align="center">
-                <strong>Item Status</strong>
-              </TableCell>
-            </TableRow>
-          </TableHead>
-          <TableBody>
-            {grnData.length > 0 ? (
-              grnData.map((grn) => (
-                <React.Fragment key={grn._id}>
-                  {grn.items.map((item) => (
-                    <TableRow key={item._id}>
-                      {/* PO Number Column */}
-                      <TableCell align="center">{grn.poNumber}</TableCell>
-
-                      {/* Receiving No. Column */}
-                      <TableCell align="center">{grn.receivingNo}</TableCell>
-
-                      <TableCell align="center">{item.itemNo}</TableCell>
-
-                      {/* Status Select for each GRN */}
-                      <TableCell align="center">
-                        <Select
-                          value={item.status || "Pending"}
-                          onChange={(e) => handleItemStatusChange(grn._id, item._id, e.target.value)}
-                          disabled={loadingGrnId === grn._id}
-                        >
-                          <MenuItem value="Pending">Pending</MenuItem>
-                          <MenuItem value="OK">OK</MenuItem>
-                          <MenuItem value="Rejected">Rejected</MenuItem>
-                        </Select>
-                      </TableCell>
-
-                      {/* Location Select for each item */}
-                      {/*  */}
-                    </TableRow>
-                  ))}
-                </React.Fragment>
-              ))
-            ) : (
-              <TableRow>
-                <TableCell colSpan={5} align="center">
-                  <Typography variant="body1" color="textSecondary">
-                    No GRN data available.
-                  </Typography>
-                </TableCell>
-              </TableRow>
-            )}
-          </TableBody>
-        </Table>
-      </TableContainer>
-
-      {/* Snackbar for status and location update feedback */}
-      <Snackbar open={snackbarOpen} autoHideDuration={6000} onClose={handleSnackbarClose}>
-        <Alert onClose={handleSnackbarClose} severity={errorMessage ? "error" : "success"}>
-          {errorMessage || snackbarMessage}
-        </Alert>
-      </Snackbar>
+      <DataGrid
+        rows={rows}
+        columns={columns}
+        pageSizeOptions={[20, 50, 100]}
+        initialState={{
+          pagination: {
+            paginationModel: { pageSize: 20, page: 0 },
+          },
+        }}
+        getRowId={(row) => row.id}
+        autoHeight
+      />
+      <ToastContainer />
     </Box>
   );
 };

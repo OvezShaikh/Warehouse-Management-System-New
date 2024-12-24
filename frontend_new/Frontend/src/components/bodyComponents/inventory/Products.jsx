@@ -31,6 +31,7 @@ export default function GrnItemsManager() {
     dockCode: "",
     receivingDate: "",
     status: "Pending",
+    supplier: "",
   });
   const [selectedGrnId, setSelectedGrnId] = useState("");
   const [addItemModal, setAddItemModal] = useState(false);
@@ -40,12 +41,18 @@ export default function GrnItemsManager() {
 
   const columns = [
     { field: "itemNo", headerName: "Item No", width: 150 },
-    { field: "quantity", headerName: "Quantity", width: 120 },
-    { field: "dockCode", headerName: "Location", width: 120 },
+    { field: "quantity", headerName: "Quantity", width: 100 },
+    { field: "currentQuantity", headerName: "Current Quantity", width: 120 },
+    { field: "dockCode", headerName: "Location", width: 80 },
     {
       field: "receivingNo",
       headerName: "Receiving No",
-      width: 200,
+      width: 150,
+    },
+    {
+      field: "supplier",
+      headerName: "Supplier",
+      width: 150,
     },
     {
       field: "receivingDate",
@@ -65,6 +72,8 @@ export default function GrnItemsManager() {
           ...item,
           grnId: grn._id,
           receivingNo: grn.receivingNo,
+          supplier: grn.supplier,
+          currentQuantity: item.currentQuantity ?? 0,
         }))
       );
       setGrnItems(items);
@@ -92,7 +101,7 @@ export default function GrnItemsManager() {
 
   // Add a new item to a GRN
   const addItemToGrn = async () => {
-    if (!selectedGrnId || !newItem.itemNo || !newItem.description || !newItem.serialNumber || !newItem.invoiceNo || !newItem.dockCode || !newItem.quantity || !newItem.receivingDate) {
+    if (!selectedGrnId || !newItem.itemNo || !newItem.description || !newItem.serialNumber || !newItem.invoiceNo || !newItem.dockCode || newItem.quantity <= 0 || !newItem.receivingDate ) {
       setError("Please fill out all fields.");
       return;
     }
@@ -118,6 +127,7 @@ export default function GrnItemsManager() {
         dockCode: "",
         receivingDate: "",
         status: "Pending",
+        supplier: "",
       });
       fetchGrnItems();
     } catch (err) {
@@ -143,9 +153,14 @@ export default function GrnItemsManager() {
       <DataGrid
         rows={grnItems}
         columns={columns}
-        pageSize={10}
+        pageSizeOptions={[20, 50, 100]}
+        initialState={{
+          pagination: {
+            paginationModel: { pageSize: 20, page: 0 },
+          },
+        }}
         getRowId={(row) => `${row.receivingNo}-${row.itemNo}`}
-        autoHeight
+        style={{ height: "400px" }}
       />
 
       {/* Modal to add new item */}
@@ -168,6 +183,14 @@ export default function GrnItemsManager() {
               </option>
             ))}
           </TextField>
+
+          <TextField
+            fullWidth
+            margin="dense"
+            label="Supplier"
+            value={grnList.find((grn) => grn._id === selectedGrnId)?.supplier || ""}
+            InputProps={{ readOnly: true }}
+          />
 
           <TextField
             fullWidth

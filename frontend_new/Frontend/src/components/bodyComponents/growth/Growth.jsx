@@ -20,28 +20,28 @@ const Growth = () => {
 
 
   // Function to record visitor status (active or bounce)
-  const recordVisitor = async (status) => {
-    try {
-      await axios.post(`${import.meta.env.VITE_API_URL}/api/visitors`, { status });
-      console.log('Visitor recorded:', status);
-    } catch (error) {
-      console.error('Error recording visitor:', error);
-    }
-  };
+  // const recordVisitor = async (status) => {
+  //   try {
+  //     await axios.post(`${import.meta.env.VITE_API_URL}/api/visitors`, { status });
+  //     console.log('Visitor recorded:', status);
+  //   } catch (error) {
+  //     console.error('Error recording visitor:', error);
+  //   }
+  // };
 
   // Fetch the total visitors count when the component mounts
-  useEffect(() => {
-    const fetchTotalVisitors = async () => {
-      try {
-        const response = await axios.get(`${import.meta.env.VITE_API_URL}/api/visitors/active`);
-        setTotalVisitors(response.data.activeVisitors); // Set the active visitors count
-      } catch (error) {
-        console.error("Error fetching total visitors:", error);
-      }
-    };
+  // useEffect(() => {
+  //   const fetchTotalVisitors = async () => {
+  //     try {
+  //       const response = await axios.get(`${import.meta.env.VITE_API_URL}/api/visitors/active`);
+  //       setTotalVisitors(response.data.activeVisitors); // Set the active visitors count
+  //     } catch (error) {
+  //       console.error("Error fetching total visitors:", error);
+  //     }
+  //   };
 
-    fetchTotalVisitors();
-  }, []); // Only run once when the component mounts
+  //   fetchTotalVisitors();
+  // }, []); // Only run once when the component mounts
 
   // const revenuCards = [
   //   {

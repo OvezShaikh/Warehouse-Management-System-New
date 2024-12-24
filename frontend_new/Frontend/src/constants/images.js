@@ -4,6 +4,7 @@ import SupplierManagement from '../assets/Supplier-management.jpg';
 import UnostarLogo from '../assets/UnostarLogo.png';
 import Isologo from '../assets/Isologo.png';
 import Logo2 from '../assets/Logo2.png';
+import LoginPic from "../assets/LoginPic.jpg";
 
 export default {
     RealTimeInventoryTracking,
@@ -11,5 +12,6 @@ export default {
     SupplierManagement,
     UnostarLogo,
     Isologo,
-    Logo2
+    Logo2,
+    LoginPic,
 }
