@@ -9,6 +9,7 @@ import { format } from 'date-fns';
 import { useAuth } from "../../../AuthContext";
 
 const GRNComponent = () => {
+  const [masterPOList, setMasterPOList] = useState([]);
   const [file, setFile] = useState(null);
   const [grnData, setGrnData] = useState([]);
   const [locationList, setLocationList] = useState([]);
@@ -33,6 +34,7 @@ const GRNComponent = () => {
   const toggleToastVisibility = () => {
     setToastVisible(!toastVisible);
   };
+
   const handleQrScan = useCallback((result) => {
     if (result && result.text) {
       const scannedData = result.text;
@@ -71,6 +73,7 @@ const GRNComponent = () => {
                   InvoiceNo: values[7] || 'Default Invoice',
                   Location: values[8] || 'Unknown',
                   ReceivingDate: values[9] || new Date().toLocaleDateString(), // Assuming the receiving date is now
+                  Amount: values[10] || 'Unknown',
                 }
               ]
             };
@@ -95,6 +98,7 @@ const GRNComponent = () => {
               invoiceNo: item.InvoiceNo,
               dockCode: item.docklocation || item.dockCode,
               receivingDate: item.ReceivingDate, // If not available in the scanned data
+              amount: item.Amount,
             }))
           }));
 
@@ -153,6 +157,8 @@ const GRNComponent = () => {
         setErrorMessage("Failed to fetch live locations.");
       }
     };
+
+
 
     const fetchAllGrns = async () => {
       try {
@@ -321,6 +327,7 @@ const GRNComponent = () => {
           invoiceNo: row.getCell(8).value,
           location: row.getCell(10).value,
           receivingDate: receivingDate,
+          amount: row.getCell(11).value,
         };
 
         let existingGRN = grnDataArray.find(grn => grn.poNumber === poNumber && grn.receivingNo === receivingNo);
@@ -373,6 +380,7 @@ const GRNComponent = () => {
             invoiceNo: item.invoiceNo,
             dockCode: item.docklocation || item.dockCode,
             receivingDate: item.receivingDate,
+            amount: item.amount,
           })),
         };
 
@@ -557,6 +565,7 @@ const GRNComponent = () => {
               <TableCell align="center"><strong>Serial Number</strong></TableCell>
               <TableCell align="center"><strong>Receiving Date</strong></TableCell>
               <TableCell align="center"><strong>Location</strong></TableCell>
+              <TableCell align="center"><strong>Amount</strong></TableCell>
 
             </TableRow>
           </TableHead>
@@ -591,6 +600,7 @@ const GRNComponent = () => {
                       ))}
                     </Select>
                   </TableCell>
+                  <TableCell align="center">{item.amount}</TableCell>
                 </TableRow>
               ))
             ))}
@@ -619,6 +629,7 @@ const GRNComponent = () => {
               <TableCell align="center" style={{ position: 'sticky', left: '180px', backgroundColor: 'white', zIndex: 2 }}><strong>Item No.</strong></TableCell>
               <TableCell align="center"><strong>Description</strong></TableCell>
               <TableCell align="center"><strong>Quantity</strong></TableCell>
+              <TableCell align="center"><strong>Amount</strong></TableCell>
               <TableCell align="center"><strong>Supplier</strong></TableCell>
               <TableCell align="center"><strong>Serial Number</strong></TableCell>
               <TableCell align="center"><strong>Invoice No.</strong></TableCell>
@@ -681,6 +692,7 @@ const GRNComponent = () => {
                         <TableCell align="center" style={{ position: 'sticky', left: '180px', backgroundColor: 'white', zIndex: 2 }}>{item.itemNo}</TableCell>
                         <TableCell align="center">{item.description}</TableCell>
                         <TableCell align="center">{item.quantity}</TableCell>
+                        <TableCell align="center">{item.amount}</TableCell>
                         <TableCell align="center">{grn.supplier}</TableCell>
                         <TableCell align="center">{item.serialNumber}</TableCell>
                         <TableCell align="center">{item.invoiceNo}</TableCell>

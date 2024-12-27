@@ -38,6 +38,9 @@ export default function GrnItemsManager() {
   const [success, setSuccess] = useState(null);
   const [error, setError] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [masterList, setMasterList] = useState([]);
+  const [itemNoError, setItemNoError] = useState("");
+
 
   const columns = [
     { field: "itemNo", headerName: "Item No", width: 150 },
@@ -99,12 +102,34 @@ export default function GrnItemsManager() {
     fetchLocations();
   }, []);
 
+  useEffect(() => {
+    const fetchMasterList = async () => {
+      try {
+        const response = await axios.get(`${import.meta.env.VITE_API_URL}/api/masterlist`);
+        setMasterList(response.data.itemNos || []);
+      } catch (err) {
+        console.error("Error fetching master list:", err);
+        setError("Failed to fetch master list.");
+      }
+    };
+  
+    fetchMasterList();
+  }, []);
+  
   // Add a new item to a GRN
   const addItemToGrn = async () => {
     if (!selectedGrnId || !newItem.itemNo || !newItem.description || !newItem.serialNumber || !newItem.invoiceNo || !newItem.dockCode || newItem.quantity <= 0 || !newItem.receivingDate ) {
       setError("Please fill out all fields.");
       return;
     }
+
+    if (!masterList.includes(newItem.itemNo)) {
+      setItemNoError(`Item No "${newItem.itemNo}" is not in the master list.`);
+      toast.error(`Item No "${newItem.itemNo}" is not in the master list.`);
+      return;
+    } else {
+      setItemNoError(""); // Clear any previous error
+    }  
 
     try {
       const grn = grnList.find((grn) => grn._id === selectedGrnId);
@@ -160,7 +185,7 @@ export default function GrnItemsManager() {
           },
         }}
         getRowId={(row) => `${row.receivingNo}-${row.itemNo}`}
-        style={{ height: "400px" }}
+        style={{ height: "500px" }}
       />
 
       {/* Modal to add new item */}
@@ -198,7 +223,11 @@ export default function GrnItemsManager() {
             label="Item No"
             value={newItem.itemNo}
             onChange={(e) => setNewItem({ ...newItem, itemNo: e.target.value })}
-          />
+          />{itemNoError && (
+            <Alert severity="error" style={{ marginTop: "8px" }}>
+              {itemNoError}
+            </Alert>
+          )}
 
           <TextField
             fullWidth

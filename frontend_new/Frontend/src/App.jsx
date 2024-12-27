@@ -37,6 +37,7 @@ import Report2Component from "./components/bodyComponents/grn_component/Report2"
 // import GRNForm from "./components/bodyComponents/grn_component/GRNForm";
 import useFetchGrnData from "./hooks/useFetchGrnData";
 import Returntosupplier from "./components/bodyComponents/Returntosupplier/Returntosupplier";
+import MasterListUpload from "./components/bodyComponents/MasterList/MasterListUpload";
 
 // ProtectedRoute Component
 const ProtectedRoute = ({ token, userRole, allowedRoles, children }) => {
@@ -230,9 +231,17 @@ function App() {
               <LocationManager grnData={grnData} setGrnData={setGrnData} grnItems={grnData} />
             </ProtectedRoute>
           }
-        />
-        
+        /> 
+        <Route
+          path="/masterlistupload"
+          element={
+            <ProtectedRoute token={token} userRole={userRole} allowedRoles={["admin"]}>
+              <MasterListUpload grnData={grnData} setGrnData={setGrnData} grnItems={grnData} />
+            </ProtectedRoute>
+          }
+        /> 
       </Route>
+      
     )
   );
 

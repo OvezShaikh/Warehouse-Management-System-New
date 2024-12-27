@@ -21,6 +21,7 @@ import {
   AddLocationAltOutlined,
   LocationOnOutlined,
   ProductionQuantityLimitsOutlined,
+  AdminPanelSettingsOutlined,
 } from "@mui/icons-material";
 import { useLocation, useNavigate } from "react-router-dom";
 
@@ -42,6 +43,8 @@ const SideBarComponent = () => {
     { title: "Report2", component: <MonetizationOnOutlined fontSize="medium" color="primary" /> },
     { title: "ReturnToSupplier", component: <ProductionQuantityLimitsOutlined fontSize="medium" color="primary" /> },
     { title: "Growth", component: <TrendingUpOutlined fontSize="medium" color="primary" /> },
+    { title: "MasterListUpload", component: <AdminPanelSettingsOutlined fontSize="medium" color="primary" /> },
+
 
     // { title: "Settings", component: <SettingsOutlined fontSize="medium" color="primary" /> },
     
