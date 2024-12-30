@@ -44,7 +44,7 @@ const ProtectedRoute = ({ token, userRole, allowedRoles, children }) => {
   if (!token && !userRole) {
     return <Navigate to="/login" replace />;
   }
-  console.log("allowedRoles:", allowedRoles);
+  // console.log("allowedRoles:", allowedRoles);
   if (allowedRoles && userRole && !allowedRoles.includes(userRole)) {
     return <Navigate to="/home" replace />;
   }

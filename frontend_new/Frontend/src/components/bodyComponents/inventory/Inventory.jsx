@@ -10,7 +10,7 @@ import axios from "axios";
 
 const Inventory = () => {
   const [drawerOpen, setDrawerOpen] = useState(false);
-  const [grnData, setGrnData] = useState([]); // State to hold GRN data
+  const [grnData, setGrnData] = useState([]);
   const isSmallScreen = useMediaQuery((theme) => theme.breakpoints.down('md'));
 
   const fetchGrnData = async () => {
@@ -23,7 +23,7 @@ const Inventory = () => {
   };
 
   useEffect(() => {
-    fetchGrnData(); // Fetch data on component mount
+    fetchGrnData(); 
   }, []);
 
   return (
@@ -63,7 +63,7 @@ const Inventory = () => {
                 borderRadius: 2,
                 padding: 3,
                 height: "100%",
-                boxShadow: 3, // Add shadow for separation
+                boxShadow: 3,
               }}
             >
               <Typography variant="h5" sx={{ m: 3, fontWeight: "bold" }}>
@@ -80,7 +80,7 @@ const Inventory = () => {
                 borderRadius: 5,
                 padding: 3,
                 height: "100%",
-                boxShadow: 3, // Add shadow for separation
+                boxShadow: 3, 
               }}
             >
               <Typography variant="h5" sx={{ m: 3, fontWeight: "bold" }}>

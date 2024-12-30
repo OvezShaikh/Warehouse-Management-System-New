@@ -143,7 +143,7 @@ const GRNComponent = () => {
         const response = await axios.get(`${import.meta.env.VITE_API_URL}/api/locations`);
 
         // Log the response to check the format of the returned data
-        console.log("Locations Response:", response);
+        // console.log("Locations Response:", response);
 
         // Ensure that the locations data is in the expected format
         if (response.data && Array.isArray(response.data)) {
@@ -163,9 +163,9 @@ const GRNComponent = () => {
     const fetchAllGrns = async () => {
       try {
         const response = await axios.get(`${import.meta.env.VITE_API_URL}/api/grn`);
-        console.log("fetchallgrns Full Response:", response);
-        console.log("Response from backend:", response.data);
-        console.log("Type of response.data:", typeof response.data);
+        // console.log("fetchallgrns Full Response:", response);
+        // console.log("Response from backend:", response.data);
+        // console.log("Type of response.data:", typeof response.data);
 
         if (Array.isArray(response.data.grns)) {
           setAllGrns(response.data.grns);  // Update the state with all GRNs
@@ -189,27 +189,21 @@ const GRNComponent = () => {
 
   const handleLocationBeforeCreation = (grnIndex, itemIndex, locationCode) => {
     const updatedGrnData = [...grnData];  // Copy the current GRN data
-
     const item = updatedGrnData[grnIndex].items[itemIndex];
-
     if (!item) {
       console.error("Item not found in GRN data.");
       return;
     }
-
     // Find the location object by locationCode
     const location = locationList.find(loc => loc.dockCode === locationCode);
     if (!location) {
       console.error(`Location with dockCode ${locationCode} not found.`);
       return;
     }
-
     // Set the docklocation for the item
     item.docklocation = location.dockCode;
-
     // Update the state with the modified GRN data
     setGrnData(updatedGrnData);
-
     console.log("Dock location set for item:", item);
   };
 
@@ -288,7 +282,6 @@ const GRNComponent = () => {
       setLoadingGrnId(null); // Reset loading spinner
     }
   };
-
 
   const handleFileChange = (e) => {
     const selectedFile = e.target.files[0];
@@ -452,7 +445,6 @@ const GRNComponent = () => {
 
   const handleDeleteItem = async (grnId, itemNo) => {
 
-
     if (userRole !== 'admin') {
       toast.error("You do not have permission to delete items.");
       return;
@@ -500,8 +492,6 @@ const GRNComponent = () => {
     }
   }, [toastVisible]);
 
-
-  
   return (
     <Box sx={{ padding: 4 }}>
       {toastVisible && (
@@ -526,19 +516,16 @@ const GRNComponent = () => {
         </Box>
       )}
 
-      {/* Button to Open QR Scanner */}
+      
       <Button variant="contained" color="primary" disabled={isScannerOpen} onClick={() => setIsScannerOpen(true)} sx={{ marginTop: 4, marginBottom: 4, marginRight: 3 }}>
         Open QR Scanner
       </Button>
 
-
-      {/* Success or Error Message */}
       {successMessage && (
         <div style={{ marginTop: 20, color: 'green' }}>
           {successMessage}
         </div>
       )}
-
 
       <input type="file" accept=".xlsx, .xls" onChange={handleFileChange} />
       <Button variant="contained" onClick={handleUpload} sx={{ marginTop: 2, marginBottom: 2 }}>
@@ -643,7 +630,7 @@ const GRNComponent = () => {
           <TableBody>
             {Array.isArray(allGrns) && allGrns.length === 0 ? (
               <TableRow>
-                <TableCell colSpan={11} align="center">
+                <TableCell colSpan={12} align="center">
                   No GRNs available
                 </TableCell>
               </TableRow>
@@ -796,7 +783,7 @@ const GRNComponent = () => {
                           <Button
                             variant="outlined"
                             color="error"
-                            onClick={() => handleDeleteItem(grn._id, item.itemNo)} // Delete item action
+                            onClick={() => handleDeleteItem(grn._id, item.itemNo)}
                           >
                             Delete Item
                           </Button>

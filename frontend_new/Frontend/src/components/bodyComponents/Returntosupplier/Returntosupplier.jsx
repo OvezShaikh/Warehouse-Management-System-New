@@ -157,7 +157,7 @@ const Returntosupplier = () => {
                         <Typography variant="h5" sx={{ m: 3, fontWeight: "bold" }}>
                             Return To Supplier
                         </Typography>
-                        <div style={{ height: 450, width: "100%" }}>
+                        <div style={{ height: 480, width: "100%" }}>
                             <DataGrid
                                 rows={rows}
                                 columns={columns}

@@ -190,7 +190,7 @@ const QualityCheckComponent = () => {
   ];
 
   return (
-    <Box sx={{ padding: 4, backgroundColor: "white" }}>
+    <Box sx={{ padding: 4, backgroundColor: "white", borderRadius: 2 }}>
       <Typography variant="h5" sx={{ fontWeight: "bold", mb: 2 }}>
         Quality Check
       </Typography>
@@ -204,7 +204,8 @@ const QualityCheckComponent = () => {
           },
         }}
         getRowId={(row) => row.id}
-        autoHeight
+        // autoHeight
+        sx={{height: "500px"}}
       />
       <ToastContainer />
     </Box>

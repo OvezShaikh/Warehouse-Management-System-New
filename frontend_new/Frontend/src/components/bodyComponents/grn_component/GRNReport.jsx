@@ -40,6 +40,7 @@ const GRNReport = () => {
     // }, []);
 
     //for all ponumbers
+
     useEffect(() => {
         const fetchPoNumbers = async () => {
             try {
@@ -368,7 +369,7 @@ const GRNReport = () => {
 
                             {loading && <Typography>Loading...</Typography>}
 
-                            {grnData && grnData.items && grnData.items.length > 0 &&  (
+                            {grnData && grnData.items && grnData.items.length > 0 && (
                                 <Box sx={{ border: '1px solid black', padding: '16px', marginBottom: '10px' }} className="printable-grn">
                                     <img
                                         src={images.UnostarLogo}
@@ -564,11 +565,12 @@ const GRNReport = () => {
                                     </Button>
                                 </Box>
                             ) : (
-                                <TableRow>
-                                    <TableCell colSpan={7} sx={{ textAlign: 'center' }}>
-                                        No items found for the selected GRN.
-                                    </TableCell>
-                                </TableRow>
+                                // <TableRow>
+                                //     <TableCell colSpan={7} sx={{ textAlign: 'center' }}>
+                                //         No items found for the selected GRN.
+                                //     </TableCell>
+                                // </TableRow>
+                                <Typography colSpan={7} sx={{ textAlign: 'center' }}>No items found for the selected GRN.</Typography>
                             )}
                         </Grid>
                     </Grid>

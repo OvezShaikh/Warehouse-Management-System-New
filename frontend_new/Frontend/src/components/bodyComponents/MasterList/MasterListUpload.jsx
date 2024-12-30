@@ -118,7 +118,7 @@ const MasterListUpload = () => {
   }, []);
 
   return (
-    <Box sx={{ p: 6  }}>
+    <Box sx={{ p: 2  }}>
       {/* AppBar for mobile */}
       {isSmallScreen && (
         <AppBar position="fixed">
@@ -126,7 +126,7 @@ const MasterListUpload = () => {
             <IconButton edge="start" color="inherit" onClick={() => setDrawerOpen(true)}>
               <MenuIcon />
             </IconButton>
-            <Typography variant="h6" sx={{ marginLeft: 2 }}>
+            <Typography variant="h6" sx={{ marginLeft: 1 }}>
               Master List Upload
             </Typography>
           </Toolbar>
