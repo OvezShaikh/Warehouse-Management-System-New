@@ -1,47 +1,38 @@
 import React, { useEffect, useState } from "react";
 import ApexCharts from "react-apexcharts";
-import { Box } from "@mui/material";
-export default function Channels() {
-  //   const total = data.reduce((sum, value) => sum + value, 0);
-  // const percentages = data.map(value => ((value / total) * 100).toFixed(2) + '%');
+import { Box, Typography } from "@mui/material";
+
+export default function Channels({ grnData }) {
   const [channelData, setChannelData] = useState([]);
+
   useEffect(() => {
-    setChannelData([
-      {
-        name: "Online Store",
-        data: [14, 25, 21, 17, 12, 13, 11],
-      },
-      {
-        name: "Amazon Marketplace",
-        data: [13, 23, 20, 8, 13, 27, 33],
-      },
-      {
-        name: "eBay Marketplace",
-        data: [11, 17, 15, 15, 21, 14, 15],
-      },
-      {
-        name: "Physical Store",
-        data: [50, 27, 13, 19, 16, 10, 5],
-      },
-      {
-        name: "Distributors",
-        data: [33, 4, 25, 20, 24, 11, 44],
-      },
-    ]);
+    if (grnData && grnData.length > 0) {
+      const processedData = {};
+      grnData.forEach((grn) => {
+        const supplier = grn.supplier || "Unknown Supplier";
 
-    return () => {
-      setChannelData([]);
-    };
-  }, []);
+        if (!processedData[supplier]) {
+          processedData[supplier] = Array(7).fill(0); // Initialize with zeros for 7 days
+        }
 
-  let totalArray = [];
-  const total = channelData.forEach((value) => {
-    const data = value.data;
-    if (totalArray.length === 0) totalArray = [...data];
-    else {
-      data.forEach((val, index) => (totalArray[index] += val));
+        grn.items.forEach((item) => {
+          // Assuming receivingDate is used to group data by the day of the week
+          const dayIndex = new Date(item.receivingDate).getDay(); // 0 = Sunday, 6 = Saturday
+          processedData[supplier][dayIndex] += item.quantity;
+        });
+      });
+
+      // Transform processed data into chart format
+      const transformedData = Object.keys(processedData).map((supplier) => ({
+        name: supplier,
+        data: processedData[supplier],
+      }));
+
+      setChannelData(transformedData);
+    } else {
+      setChannelData([]); // Clear data if grnData is empty
     }
-  });
+  }, [grnData]); // Re-run when grnData changes
 
   const options3 = {
     chart: {
@@ -58,7 +49,7 @@ export default function Channels() {
       offsetY: 0,
     },
     title: {
-      text: "Channels",
+      text: "Quantity by Supplier (Grouped by Day of the Week)",
     },
     plotOptions: {
       bar: {
@@ -70,9 +61,10 @@ export default function Channels() {
       opacity: 1,
     },
     xaxis: {
-      categories: ["Mon", "Thu", "Wed", "The", "Fri", "Sat", "Sun"],
+      categories: ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"], // Days of the week
     },
   };
+
   return (
     <Box
       sx={{
@@ -83,13 +75,22 @@ export default function Channels() {
         height: "95%",
       }}
     >
-      <ApexCharts
-        options={options3}
-        series={channelData}
-        type="bar"
-        width="100%"
-        height="320"
-      />
+      {channelData.length > 0 ? (
+        <ApexCharts
+          options={options3}
+          series={channelData}
+          type="bar"
+          width="100%"
+          height="320"
+        />
+      ) : (
+        <Typography
+          variant="h6"
+          sx={{ textAlign: "center", color: "gray", marginTop: "100px" }}
+        >
+          No Data Available
+        </Typography>
+      )}
     </Box>
   );
 }

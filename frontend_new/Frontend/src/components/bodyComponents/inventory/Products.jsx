@@ -1,64 +1,331 @@
-import { Typography } from "@mui/material";
-import React from "react";
-import Product from "./Product";
+import React, { useState, useEffect } from "react";
+import {
+  Box,
+  Button,
+  Snackbar,
+  Alert,
+  TextField,
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  DialogActions,
+  Select,
+  MenuItem,
+  InputLabel,
+  FormControl,
+} from "@mui/material";
 import { DataGrid } from "@mui/x-data-grid";
-import productList from "./productList";
-export default function Products() {
-  const columns = [
-    {
-      field: "id",
-      headerName: "ID",
-      width: 90,
-      description: "id of the product",
-    },
-    {
-      field: "product",
-      headerName: "Product",
-      width: 400,
-      description: "",
-      //same here we have the cell data which i will get the value of the cells in the tables cellData.row.fieldName
+import axios from "axios";
+import { toast } from "react-toastify"; // Assuming you use react-toastify for notifications
 
-      renderCell: (cellData) => {
-        console.log("the cell data is : ", cellData.row.name);
-        return <Product productName={cellData.row.name} />;
-      },
-    },
+export default function GrnItemsManager() {
+  const [grnItems, setGrnItems] = useState([]);
+  const [grnList, setGrnList] = useState([]);
+  const [locationList, setLocationList] = useState([]); // Store locations here
+  const [newItem, setNewItem] = useState({
+    itemNo: "",
+    description: "",
+    quantity: 0,
+    serialNumber: "",
+    invoiceNo: "",
+    dockCode: "",
+    receivingDate: "",
+    status: "Pending",
+    supplier: "",
+  });
+  const [selectedGrnId, setSelectedGrnId] = useState("");
+  const [addItemModal, setAddItemModal] = useState(false);
+  const [success, setSuccess] = useState(null);
+  const [error, setError] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [masterList, setMasterList] = useState([]);
+  const [itemNoError, setItemNoError] = useState("");
+
+
+  const columns = [
+    { field: "itemNo", headerName: "Item No", width: 150 },
+    { field: "quantity", headerName: "Quantity", width: 100 },
+    { field: "currentQuantity", headerName: "Current Quantity", width: 120 },
+    { field: "dockCode", headerName: "Location", width: 80 },
     {
-      field: "category",
-      headerName: "Category",
-      width: 200,
-      description: "category of the product",
-    },
-    {
-      field: "price",
-      headerName: "Price",
+      field: "receivingNo",
+      headerName: "Receiving No",
       width: 150,
-      description: "price of the product",
-      valueGetter: (params) => "$" + params.row.stock,
     },
     {
-      field: "stock",
-      headerName: "Stock",
-      width: 200,
-      description: "how many items in the stock",
-      valueGetter: (params) => params.row.stock + " pcs",
+      field: "supplier",
+      headerName: "Supplier",
+      width: 150,
     },
+    {
+      field: "receivingDate",
+      headerName: "Receiving Date",
+      width: 200,
+    },
+    { field: "status", headerName: "Status", width: 120 },
   ];
 
+  // Fetch GRN items and locations
+  const fetchGrnItems = async () => {
+    try {
+      const response = await axios.get(`${import.meta.env.VITE_API_URL}/api/grn`);
+      const allGrns = response.data.grns;
+      const items = allGrns.flatMap((grn) =>
+        grn.items.map((item) => ({
+          ...item,
+          grnId: grn._id,
+          receivingNo: grn.receivingNo,
+          supplier: grn.supplier,
+          currentQuantity: item.currentQuantity ?? 0,
+        }))
+      );
+      setGrnItems(items);
+      setGrnList(allGrns);
+    } catch (err) {
+      console.error("Error fetching GRN items:", err);
+      setError("Failed to fetch GRN items.");
+    }
+  };
+
+  // Fetch locations using the approach from your `grn` component
+  useEffect(() => {
+    const fetchLocations = async () => {
+      try {
+        const response = await axios.get(`${import.meta.env.VITE_API_URL}/api/docklocations`);
+        setLocationList(response.data); // Update location list
+      } catch (err) {
+        console.error("Error fetching locations:", err);
+        toast.error("Error fetching locations."); // Show error notification
+      }
+    };
+
+    fetchLocations();
+  }, []);
+
+  useEffect(() => {
+    const fetchMasterList = async () => {
+      try {
+        const response = await axios.get(`${import.meta.env.VITE_API_URL}/api/masterlist`);
+        setMasterList(response.data.itemNos || []);
+      } catch (err) {
+        console.error("Error fetching master list:", err);
+        setError("Failed to fetch master list.");
+      }
+    };
+  
+    fetchMasterList();
+  }, []);
+  
+  // Add a new item to a GRN
+  const addItemToGrn = async () => {
+    if (!selectedGrnId || !newItem.itemNo || !newItem.description || !newItem.serialNumber || !newItem.invoiceNo || !newItem.dockCode || newItem.quantity <= 0 || !newItem.receivingDate ) {
+      setError("Please fill out all fields.");
+      return;
+    }
+
+    if (!masterList.includes(newItem.itemNo)) {
+      setItemNoError(`Item No "${newItem.itemNo}" is not in the master list.`);
+      toast.error(`Item No "${newItem.itemNo}" is not in the master list.`);
+      return;
+    } else {
+      setItemNoError(""); // Clear any previous error
+    }  
+
+    try {
+      const grn = grnList.find((grn) => grn._id === selectedGrnId);
+      if (!grn) {
+        setError("Selected GRN not found.");
+        return;
+      }
+
+      const updatedItems = [...grn.items, newItem];
+      await axios.put(`${import.meta.env.VITE_API_URL}/api/grn/${selectedGrnId}`, { items: updatedItems });
+
+      setSuccess("Item added successfully.");
+      setAddItemModal(false);
+      setNewItem({
+        itemNo: "",
+        description: "",
+        quantity: 0,
+        serialNumber: "",
+        invoiceNo: "",
+        dockCode: "",
+        receivingDate: "",
+        status: "Pending",
+        supplier: "",
+      });
+      fetchGrnItems();
+    } catch (err) {
+      console.error("Error adding item to GRN:", err);
+      setError("Failed to add item.");
+    }
+  };
+
+  // Fetch data on component mount
+  useEffect(() => {
+    fetchGrnItems();
+  }, []);
+
   return (
-    <div>
+    <Box>
+      <Box sx={{ display: "flex", justifyContent: "space-between", mb: 2 }}>
+        <Button variant="contained" onClick={() => setAddItemModal(true)}>
+          Add Item to GRN
+        </Button>
+      </Box>
+
+      {/* DataGrid to show all GRN items */}
       <DataGrid
-        sx={{ borderLeft: 0, borderRight: 0, borderRadius: 0 }}
-        rows={productList}
+        rows={grnItems}
         columns={columns}
+        pageSizeOptions={[20, 50, 100]}
         initialState={{
           pagination: {
-            paginationModel: { page: 0, pageSize: 10 },
+            paginationModel: { pageSize: 20, page: 0 },
           },
         }}
-        pageSizeOptions={[5, 10, 20]}
-        checkboxSelection
+        getRowId={(row) => `${row.receivingNo}-${row.itemNo}`}
+        style={{ height: "500px" }}
       />
-    </div>
+
+      {/* Modal to add new item */}
+      <Dialog open={addItemModal} onClose={() => setAddItemModal(false)}>
+        <DialogTitle>Add Item to GRN</DialogTitle>
+        <DialogContent>
+          <TextField
+            fullWidth
+            margin="dense"
+            label="GRN ID"
+            select
+            value={selectedGrnId}
+            onChange={(e) => setSelectedGrnId(e.target.value)}
+            SelectProps={{ native: true }}
+          >
+            <option value="">Select a GRN</option>
+            {grnList.map((grn) => (
+              <option key={grn._id} value={grn._id}>
+                {grn.receivingNo}----{grn._id}
+              </option>
+            ))}
+          </TextField>
+
+          <TextField
+            fullWidth
+            margin="dense"
+            label="Supplier"
+            value={grnList.find((grn) => grn._id === selectedGrnId)?.supplier || ""}
+            InputProps={{ readOnly: true }}
+          />
+
+          <TextField
+            fullWidth
+            margin="dense"
+            label="Item No"
+            value={newItem.itemNo}
+            onChange={(e) => setNewItem({ ...newItem, itemNo: e.target.value })}
+          />{itemNoError && (
+            <Alert severity="error" style={{ marginTop: "8px" }}>
+              {itemNoError}
+            </Alert>
+          )}
+
+          <TextField
+            fullWidth
+            margin="dense"
+            label="Description"
+            value={newItem.description}
+            onChange={(e) => setNewItem({ ...newItem, description: e.target.value })}
+          />
+
+          <TextField
+            fullWidth
+            margin="dense"
+            label="Serial Number"
+            value={newItem.serialNumber}
+            onChange={(e) => setNewItem({ ...newItem, serialNumber: e.target.value })}
+          />
+
+          <TextField
+            fullWidth
+            margin="dense"
+            label="Invoice No"
+            value={newItem.invoiceNo}
+            onChange={(e) => setNewItem({ ...newItem, invoiceNo: e.target.value })}
+          />
+
+          {/* Dock Location Dropdown */}
+          <FormControl fullWidth margin="dense">
+            <InputLabel>Location</InputLabel>
+            <Select
+              value={newItem.dockCode}
+              onChange={(e) => setNewItem({ ...newItem, dockCode: e.target.value })}
+              label="Location"
+            >
+              {locationList.length === 0 ? (
+                <MenuItem disabled>No locations available</MenuItem>
+              ) : (
+                locationList.map((location) => (
+                  <MenuItem key={location._id} value={location.dockCode}>
+                    {location.dockCode} - {location.description}
+                  </MenuItem>
+                ))
+              )}
+            </Select>
+          </FormControl>
+
+          <TextField
+            fullWidth
+            margin="dense"
+            label="Quantity"
+            type="number"
+            value={newItem.quantity}
+            onChange={(e) => setNewItem({ ...newItem, quantity: e.target.value })}
+          />
+
+          <TextField
+            fullWidth
+            margin="dense"
+            label="Receiving Date"
+            type="date"
+            value={newItem.receivingDate}
+            onChange={(e) => setNewItem({ ...newItem, receivingDate: e.target.value })}
+            InputLabelProps={{
+              shrink: true,
+            }}
+          />
+
+          <FormControl fullWidth margin="dense">
+            <InputLabel>Status</InputLabel>
+            <Select
+              value={newItem.status}
+              onChange={(e) => setNewItem({ ...newItem, status: e.target.value })}
+              label="Status"
+            >
+              <MenuItem value="Pending">Pending</MenuItem>
+              <MenuItem value="OK">OK</MenuItem>
+              <MenuItem value="Rejected">Rejected</MenuItem>
+            </Select>
+          </FormControl>
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={() => setAddItemModal(false)}>Cancel</Button>
+          <Button variant="contained" onClick={addItemToGrn}>
+            Add Item
+          </Button>
+        </DialogActions>
+      </Dialog>
+
+      {/* Success/Error Notifications */}
+      {success && (
+        <Snackbar open autoHideDuration={6000} onClose={() => setSuccess(null)}>
+          <Alert severity="success">{success}</Alert>
+        </Snackbar>
+      )}
+      {error && (
+        <Snackbar open autoHideDuration={6000} onClose={() => setError(null)}>
+          <Alert severity="error">{error}</Alert>
+        </Snackbar>
+      )}
+    </Box>
   );
 }

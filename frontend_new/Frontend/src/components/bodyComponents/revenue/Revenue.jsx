@@ -50,7 +50,7 @@ const Revenue = () => {
   ];
 
   return (
-    <Box sx={{ p: 3, }}>
+    <Box sx={{ p: 6 }}>
       {isSmallScreen && (
         <AppBar position="fixed">
           <Toolbar sx={{ height: '80px' }}>

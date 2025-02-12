@@ -6,6 +6,7 @@ export default function RevenueCard(props) {
   const { number, percentage, upOrDown, color, title, subTitle, isMoney } =
     props.card;
 
+
   return (
     <Paper elevation={3} sx={{ py: 5, px: 4, borderRadius: 2 }}>
       <Box sx={{ display: "flex", flexDirection: "column" }}>
@@ -25,15 +26,15 @@ export default function RevenueCard(props) {
             )}
           </Box>
         </Box>
-        <Box sx={{ display: "flex", justifyContent: "space-between" }}>
+        <Box sx={{ display: "flex", flexDirection: "row", justifyContent: "space-between", textWrap: "wrap", textAlign: "center"}}>
           <Box>
-            <Typography fontWeight={"light"} variant="h6">
+            <Typography fontWeight={"light"} variant="h6" textAlign={"left"}>
               {title}
             </Typography>
           </Box>
           <Box>
             {percentage && (
-              <Typography fontWeight={"light"} variant="caption" color={color}>
+              <Typography fontWeight={"light"} variant="caption" color={color} >
                 {subTitle}
               </Typography>
             )}

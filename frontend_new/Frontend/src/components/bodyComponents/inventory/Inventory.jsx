@@ -1,17 +1,33 @@
 import { Grid, Box, Typography, useMediaQuery, Drawer, IconButton, AppBar, Toolbar } from "@mui/material";
-import React, { useState } from "react";
+import React, { useState, useEffect} from "react";
 import Products from "./Products";
 import Overview from "./Overview";
 import SideBarComponent from "../../SideBarComponent";
 import MenuIcon from '@mui/icons-material/Menu';
 import CloseIcon from '@mui/icons-material/Close';
+import axios from "axios";
+
 
 const Inventory = () => {
   const [drawerOpen, setDrawerOpen] = useState(false);
+  const [grnData, setGrnData] = useState([]);
   const isSmallScreen = useMediaQuery((theme) => theme.breakpoints.down('md'));
 
+  const fetchGrnData = async () => {
+    try {
+      const response = await axios.get(`${import.meta.env.VITE_API_URL}/api/grn`);
+      setGrnData(response.data.grns);
+    } catch (err) {
+      console.error("Error fetching GRN data:", err);
+    }
+  };
+
+  useEffect(() => {
+    fetchGrnData(); 
+  }, []);
+
   return (
-    <Box>
+    <Box sx={{p: 6}}>
       {isSmallScreen && (
         <AppBar position="fixed">
           <Toolbar sx={{ height: '80px' }}>
@@ -47,7 +63,7 @@ const Inventory = () => {
                 borderRadius: 2,
                 padding: 3,
                 height: "100%",
-                boxShadow: 3, // Add shadow for separation
+                boxShadow: 3,
               }}
             >
               <Typography variant="h5" sx={{ m: 3, fontWeight: "bold" }}>
@@ -64,13 +80,13 @@ const Inventory = () => {
                 borderRadius: 5,
                 padding: 3,
                 height: "100%",
-                boxShadow: 3, // Add shadow for separation
+                boxShadow: 3, 
               }}
             >
               <Typography variant="h5" sx={{ m: 3, fontWeight: "bold" }}>
                 Overview
               </Typography>
-              <Overview />
+              <Overview grnData={grnData} />
             </Box>
           </Grid>
         </Grid>

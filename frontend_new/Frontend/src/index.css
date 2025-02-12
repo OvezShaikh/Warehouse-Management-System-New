@@ -1,3 +1,90 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+@media print {
+    /* Hide all non-printable elements such as buttons and inputs */
+    .print-button, 
+    .non-printable, 
+    input, 
+    select, 
+    textarea {
+        display: none !important;
+    }
+
+    /* Hide everything on the page by default */
+    body * {
+        visibility: hidden;
+    }
+
+    /* Make the GRN section visible when printing */
+    .printable-grn, .printable-grn * {
+        visibility: visible;
+    }
+
+    /* Position the GRN section correctly for printing */
+    .printable-grn {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: auto;
+        margin: 0;
+        padding: 0;
+    }
+
+    /* Make the Stickers section visible when printing */
+    .printable-stickers, .printable-stickers * {
+        visibility: visible;
+    }
+
+    /* Position the Stickers section correctly for printing */
+    .printable-stickers {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        margin: 0;
+        padding: 0;
+    }
+
+    /* Ensure table styles for both sections */
+    .printable-grn table, 
+    .printable-stickers table {
+        width: 100%;
+        border-collapse: collapse;
+    }
+
+    /* Style for table headers and cells */
+    .printable-grn th, .printable-grn td, 
+    .printable-stickers th, .printable-stickers td {
+        border: 1px solid black;
+        padding: 6px;
+        text-align: left;
+    }
+
+    /* Avoid page breaks inside tables */
+    .printable-grn table, .printable-grn th, .printable-grn td, 
+    .printable-stickers table, .printable-stickers th, .printable-stickers td {
+        page-break-inside: avoid;
+    }
+
+    /* Adjust font size for print */
+    .printable-grn td, .printable-grn th, 
+    .printable-stickers td, .printable-stickers th {
+        font-size: 12pt;
+    }
+
+    /* Ensure no extra margins in printed output */
+    body {
+        margin: 0;
+    }
+
+    /* Specific styles for important text */
+    .printable-grn .prepared-by, 
+    .printable-grn .checked-by,
+    .printable-stickers .company-info {
+        font-size: 14pt;
+        font-weight: bold;
+    }
+}

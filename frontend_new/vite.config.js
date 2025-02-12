@@ -7,4 +7,7 @@ export default defineConfig({
   rollupOptions: {
     input: './index.html', // specify your entry point
   },
+  server: {
+    host: '0.0.0.0',  // Allow access from any device in the network
+  },
 })

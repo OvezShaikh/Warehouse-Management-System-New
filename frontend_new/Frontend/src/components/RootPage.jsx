@@ -1,18 +1,35 @@
 import React from "react";
 import { Box, Container, Typography, Grid, Button } from "@mui/material";
 import { Link } from 'react-router-dom';
-import { Fade } from '@mui/material'; // For animations
+import { Fade } from '@mui/material'; 
 import images from "../constants/images";
-import Example from "./FloatingPhone"; // Import Example component
+import LinkedInIcon from '@mui/icons-material/LinkedIn';
+import TwitterIcon from '@mui/icons-material/Twitter';
+import FacebookIcon from '@mui/icons-material/Facebook';
+import Example from "./FloatingPhone"; 
 import TeamComponent from "./TeamComponent";
 import "../../app.css";
+import NavBarComponent from "./NavBarComponent"; 
+import Footer from "./FooterComponent";
 
 export default function RootPage() {
+  const links = [
+    { href: '/', label: 'Home' },
+    { href: '/about-Us', label: 'About' },
+    { href: '/contact-us', label: 'Contact' },
+  ];
+
+  const socialLinks = [
+    { href: '#', label: 'LinkedIn', icon: <LinkedInIcon /> },
+    { href: '#', label: 'Twitter', icon: <TwitterIcon /> },
+    { href: '#', label: 'Facebook', icon: <FacebookIcon /> },
+  ];
+
   return (
     <Container 
-      maxWidth={false} // This removes the max-width constraint
-      disableGutters // This removes the default padding
-      sx={{ bgcolor: "#f0f4f8", py: 10, px: 5 }} // Add any custom padding or other styles as needed
+      maxWidth={false} 
+      disableGutters 
+      sx={{ bgcolor: "#f0f4f8", py: 5, px: 5, mb : 0 }} 
     >
       {/* Header Section */}
       <Box sx={{ textAlign: 'center', mb: 5  }}>
@@ -76,25 +93,17 @@ export default function RootPage() {
         <Example />
       </Box>
 
-      <div className="h-screen bg-gray-100 flex items-center justify-center">
-      <h1 className="text-4xl font-bold text-blue-500">
-        Hello, Tailwind CSS with Vite!
-      </h1>
-    </div>
-        <Box>
-        <TeamComponent/>
-        </Box>
+      
+    {/* <Box sx={{ textAlign: 'center', mt: 8 }}>
+        <TeamComponent />
+      </Box> */}
+        <div>
+        <Footer />
+        </div>
       
 
-      {/* Call to Action Section */}
-      {/* <Box sx={{ textAlign: 'center', mt: 5 }}>
-        <Typography variant="h5" sx={{ mb: 2 }}>Get Started Today!</Typography>
-        <Link to="/home" style={{ textDecoration: 'none' }}>
-          <Button variant="contained" color="primary" size="large">
-            Home
-          </Button>
-        </Link>
-      </Box> */}
+      
+     
     </Container>
   );
 }

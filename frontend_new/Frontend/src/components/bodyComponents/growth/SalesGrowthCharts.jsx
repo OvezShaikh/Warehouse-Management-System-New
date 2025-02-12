@@ -1,13 +1,52 @@
+import React, { useState, useEffect } from "react";
 import { Box } from "@mui/material";
-import React from "react";
 import ApexCharts from "react-apexcharts";
+import axios from "axios";
 
-export default function SalesGrowthCharts() {
+const SalesGrowthCharts = () => {
+  const [chartData, setChartData] = useState({
+    series: [{ name: "Quantity", type: "column", data: [] }],
+    categories: [],
+  });
+
+  useEffect(() => {
+    const fetchGRNData = async () => {
+      try {
+        const response = await axios.get(`${import.meta.env.VITE_API_URL}/api/grn`);
+        const grns = response.data.grns;
+
+        // Initialize an array to hold the total quantities per month
+        const monthlyQuantities = Array(12).fill(0);
+
+        // Populate the monthly quantities based on the receivingDate of the items
+        grns.forEach((grn) => {
+          grn.items.forEach((item) => {
+            const month = new Date(item.receivingDate).getMonth(); // Get month (0-based index)
+            monthlyQuantities[month] += item.quantity;
+          });
+        });
+
+        // Update the chart data with the calculated quantities
+        setChartData({
+          series: [{ name: "Quantity", type: "column", data: monthlyQuantities }],
+          categories: [
+            "Jan", "Feb", "Mar", "Apr", "May", "Jun", 
+            "Jul", "Aug", "Sep", "Oct", "Nov", "Dec",
+          ],
+        });
+      } catch (error) {
+        console.error("Error fetching GRN data:", error);
+      }
+    };
+
+    fetchGRNData();
+  }, []);
+
   const options = {
     chart: {
-      id: "basic-bar",
+      id: "sales-growth",
       type: "bar",
-      stacked: true, //one on top of another
+      stacked: true,
     },
     dataLabels: {
       enabled: true,
@@ -15,11 +54,7 @@ export default function SalesGrowthCharts() {
     legend: {
       position: "top",
       horizontalAlign: "center",
-      offsetY: 0,
     },
-    // title: {
-    //   text: "Sales Growth Over The Year",
-    // },
     plotOptions: {
       bar: {
         columnWidth: "40%",
@@ -30,42 +65,22 @@ export default function SalesGrowthCharts() {
       opacity: 1,
     },
     xaxis: {
-      categories: [
-        "Jan",
-        "Feb",
-        "Mar",
-        "Apr",
-        "May",
-        "Jun",
-        "Jul",
-        "Aut",
-        "Spt",
-        "Oct",
-        "Nov",
-        "Dec",
-      ],
+      categories: chartData.categories,
     },
     tooltip: {
       fixed: {
         enabled: true,
-        position: "topLeft", // topRight, topLeft, bottomRight, bottomLeft
+        position: "topLeft",
         offsetY: 30,
         offsetX: 60,
       },
     },
   };
-  const series = [
-    {
-      name: "Revenue",
-      type: "column",
-      data: [70, 14, 20, 93, -35, 19, 36, -22, 42, 20, -15, 17],
-    },
-  ];
+
   return (
     <Box
       sx={{
         marginX: 4,
-        // bgcolor: "white",
         borderRadius: 2,
         padding: 3,
         height: "100%",
@@ -73,11 +88,13 @@ export default function SalesGrowthCharts() {
     >
       <ApexCharts
         options={options}
-        series={series}
+        series={chartData.series}
         height={300}
         type="bar"
         width="100%"
       />
     </Box>
   );
-}
+};
+
+export default SalesGrowthCharts;
